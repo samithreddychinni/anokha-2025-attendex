@@ -9,9 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
+import { Route as EventsEventIdSessionsRouteImport } from './routes/events/$eventId/sessions'
+import { Route as EventsEventIdSessionsSessionIdAttendanceRouteImport } from './routes/events/$eventId/sessions/$sessionId/attendance'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -22,35 +36,94 @@ const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
   path: '/demo/tanstack-query',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsEventIdSessionsRoute = EventsEventIdSessionsRouteImport.update({
+  id: '/events/$eventId/sessions',
+  path: '/events/$eventId/sessions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsEventIdSessionsSessionIdAttendanceRoute =
+  EventsEventIdSessionsSessionIdAttendanceRouteImport.update({
+    id: '/$sessionId/attendance',
+    path: '/$sessionId/attendance',
+    getParentRoute: () => EventsEventIdSessionsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/events/$eventId/sessions': typeof EventsEventIdSessionsRouteWithChildren
+  '/events/$eventId/sessions/$sessionId/attendance': typeof EventsEventIdSessionsSessionIdAttendanceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/events/$eventId/sessions': typeof EventsEventIdSessionsRouteWithChildren
+  '/events/$eventId/sessions/$sessionId/attendance': typeof EventsEventIdSessionsSessionIdAttendanceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/events/$eventId/sessions': typeof EventsEventIdSessionsRouteWithChildren
+  '/events/$eventId/sessions/$sessionId/attendance': typeof EventsEventIdSessionsSessionIdAttendanceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/demo/tanstack-query'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/demo/tanstack-query'
+    | '/events/$eventId/sessions'
+    | '/events/$eventId/sessions/$sessionId/attendance'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/demo/tanstack-query'
-  id: '__root__' | '/' | '/demo/tanstack-query'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/demo/tanstack-query'
+    | '/events/$eventId/sessions'
+    | '/events/$eventId/sessions/$sessionId/attendance'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/demo/tanstack-query'
+    | '/events/$eventId/sessions'
+    | '/events/$eventId/sessions/$sessionId/attendance'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
+  LoginRoute: typeof LoginRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
+  EventsEventIdSessionsRoute: typeof EventsEventIdSessionsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -65,12 +138,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoTanstackQueryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/$eventId/sessions': {
+      id: '/events/$eventId/sessions'
+      path: '/events/$eventId/sessions'
+      fullPath: '/events/$eventId/sessions'
+      preLoaderRoute: typeof EventsEventIdSessionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$eventId/sessions/$sessionId/attendance': {
+      id: '/events/$eventId/sessions/$sessionId/attendance'
+      path: '/$sessionId/attendance'
+      fullPath: '/events/$eventId/sessions/$sessionId/attendance'
+      preLoaderRoute: typeof EventsEventIdSessionsSessionIdAttendanceRouteImport
+      parentRoute: typeof EventsEventIdSessionsRoute
+    }
   }
 }
 
+interface EventsEventIdSessionsRouteChildren {
+  EventsEventIdSessionsSessionIdAttendanceRoute: typeof EventsEventIdSessionsSessionIdAttendanceRoute
+}
+
+const EventsEventIdSessionsRouteChildren: EventsEventIdSessionsRouteChildren = {
+  EventsEventIdSessionsSessionIdAttendanceRoute:
+    EventsEventIdSessionsSessionIdAttendanceRoute,
+}
+
+const EventsEventIdSessionsRouteWithChildren =
+  EventsEventIdSessionsRoute._addFileChildren(
+    EventsEventIdSessionsRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
+  LoginRoute: LoginRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
+  EventsEventIdSessionsRoute: EventsEventIdSessionsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
