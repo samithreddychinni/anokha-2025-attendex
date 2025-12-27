@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Calendar, Users, ArrowRight } from 'lucide-react'
+import { Calendar, Users, ChevronRight, AlertCircle } from 'lucide-react'
 import api from '../lib/api'
 import { formatDate } from '../lib/utils'
 import { AuthGuard } from '../components/AuthGuard'
@@ -25,17 +25,19 @@ function Dashboard() {
         queryKey: ['organizer-events'],
         queryFn: async () => {
             const res = await api.get('/organizers/dashboard')
-            // Ensure we return an array. API result might be wrapped.
-            return (res.data.data || res.data) as Event[]
+            // API returns { message: "...", events: [...] }
+            if (res.data.events && Array.isArray(res.data.events)) {
+                return res.data.events as Event[]
+            }
+            // Fallback for other structures
+            const data = res.data.data || res.data
+            return (Array.isArray(data) ? data : []) as Event[]
         },
     })
 
-    // Mock data for dev if API fails (Optional, but helpful for UI work without backend)
-    // Remove if strict API only.
-
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-zinc-950 p-4 flex items-center justify-center">
+            <div className="min-h-screen p-4 flex items-center justify-center">
                 <Loader />
             </div>
         )
@@ -43,12 +45,17 @@ function Dashboard() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-zinc-950 p-4 flex flex-col items-center justify-center">
-                <div className="text-red-400 mb-2">Failed to load events</div>
-                <pre className="text-xs text-zinc-600 mb-4">{JSON.stringify(error, null, 2)}</pre>
+            <div className="min-h-screen p-4 flex flex-col items-center justify-center text-center">
+                <div className="bg-red-500/10 p-4 rounded-full mb-4">
+                    <AlertCircle className="text-red-500 w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Unavailable</h3>
+                <p className="text-zinc-400 mb-6 max-w-xs mx-auto">
+                    Could not load your assigned events. Please try again.
+                </p>
                 <button
                     onClick={() => window.location.reload()}
-                    className="px-4 py-2 bg-zinc-800 rounded text-white"
+                    className="px-6 py-3 bg-white text-black font-bold rounded-xl active:scale-95 transition-transform"
                 >
                     Retry
                 </button>
@@ -57,59 +64,76 @@ function Dashboard() {
     }
 
     return (
-        <AuthGuard>
-            <div className="min-h-screen bg-zinc-950 p-4 pb-20">
-                <h1 className="text-2xl font-bold text-white mb-6">Assigned Events</h1>
+        <div className="min-h-screen p-4 pb-24">
+            <header className="mb-8 pt-4">
+                <h1 className="text-3xl font-bold text-white mb-2">Your Events</h1>
+                <p className="text-zinc-400">Select an event to manage attendance.</p>
+            </header>
 
-                {(!events || events.length === 0) && (
-                    <div className="text-zinc-500 text-center py-10">
-                        No events assigned to you yet.
-                    </div>
-                )}
+            {(!events || events.length === 0) && (
+                <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800 rounded-2xl p-8 text-center">
+                    <p className="text-zinc-300 font-medium mb-2">No Events Assigned</p>
+                    <p className="text-sm text-zinc-500">
+                        Contact an administrator if you believe this is an error.
+                    </p>
+                </div>
+            )}
 
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {events?.map((event) => (
-                        <Link
-                            key={event.id}
-                            to={`/events/${event.id}/sessions` as any}
-                            className="block bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-700 transition-colors active:scale-[0.98]"
-                        >
-                            {event.poster_url && (
-                                <div className="h-32 w-full bg-zinc-800 overflow-hidden">
-                                    <img src={event.poster_url} alt={event.name} className="w-full h-full object-cover opacity-80" />
-                                </div>
-                            )}
-                            <div className="p-4">
-                                <h3 className="text-lg font-bold text-white mb-2">{event.name}</h3>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {events?.map((event) => (
+                    <Link
+                        key={event.id}
+                        to={`/events/${event.id}/sessions` as any}
+                        className="group relative block bg-zinc-900/60 backdrop-blur-md border border-zinc-800 rounded-2xl overflow-hidden active:scale-[0.98] transition-all hover:bg-zinc-900/80 hover:border-zinc-700"
+                    >
+                        {event.poster_url && (
+                            <div className="h-32 w-full bg-zinc-800 overflow-hidden relative">
+                                <img
+                                    src={event.poster_url}
+                                    alt={event.name}
+                                    className="w-full h-full object-cover opacity-80 transition-opacity group-hover:opacity-100"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/90 to-transparent" />
+                            </div>
+                        )}
 
-                                <div className="space-y-2 text-sm text-zinc-400">
-                                    <div className="flex items-center gap-2">
-                                        <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-xs border border-zinc-700">
-                                            {event.event_type}
-                                        </span>
+                        <div className="p-5 relative">
+                            {/* Status Badge Example - optional logic */}
+                            <div className="absolute top-0 right-5 -translate-y-1/2">
+                                <span className="bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shadow-lg">
+                                    Active
+                                </span>
+                            </div>
+
+                            <h3 className="text-xl font-bold text-white mb-3 pr-4 leading-tight">
+                                {event.name}
+                            </h3>
+
+                            <div className="space-y-2.5 text-sm text-zinc-400">
+                                {event.event_date && (
+                                    <div className="flex items-center gap-2.5">
+                                        <Calendar size={16} className="text-zinc-500" />
+                                        <span className="font-medium">{formatDate(event.event_date)}</span>
                                     </div>
-                                    {event.event_date && (
-                                        <div className="flex items-center gap-2">
-                                            <Calendar size={14} />
-                                            <span>{formatDate(event.event_date)}</span>
-                                        </div>
-                                    )}
-                                    {event.venue && (
-                                        <div className="flex items-center gap-2">
-                                            <Users size={14} />
-                                            <span>{event.venue}</span>
-                                        </div>
-                                    )}
-                                </div>
+                                )}
+                                {event.venue && (
+                                    <div className="flex items-center gap-2.5">
+                                        <Users size={16} className="text-zinc-500" />
+                                        <span className="font-medium">{event.venue}</span>
+                                    </div>
+                                )}
+                            </div>
 
-                                <div className="mt-4 flex items-center text-indigo-400 text-sm font-medium">
-                                    Manage Attendance <ArrowRight size={14} className="ml-1" />
+                            <div className="mt-6 flex items-center justify-between text-white font-semibold">
+                                <span>Select Event</span>
+                                <div className="bg-white/10 p-2 rounded-full group-hover:bg-white/20 transition-colors">
+                                    <ChevronRight size={20} />
                                 </div>
                             </div>
-                        </Link>
-                    ))}
-                </div>
+                        </div>
+                    </Link>
+                ))}
             </div>
-        </AuthGuard>
+        </div>
     )
 }

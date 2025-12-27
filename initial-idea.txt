@@ -1,0 +1,155 @@
+You are building a **mobile-first web application** for **Anokha 2025**, a college technical fest.
+This application is an **Organizer Attendance Portal** used during live events to mark participant attendance.
+
+---
+
+## 🧠 Core Context
+
+* Platform: **React (Web App)**
+* Target Device: **Mobile browsers (Android primarily)**
+* Build Tool: **Bun**
+* Backend: **Already implemented and fixed**
+* You must **only consume APIs**, never design backend logic
+* Design style: **Monochrome, minimal, fast, distraction-free**
+* Focus: **Reliability, clarity, speed during crowded events**
+
+---
+
+## 🎯 Purpose of the App
+
+Organizers will:
+
+* Log in
+* Select their assigned event
+* Choose an event session (multi-day / multi-session supported)
+* Mark attendance via QR scanning or manual override
+* View attendance in real time
+* Export attendance after the event
+
+No student-facing functionality exists in this app.
+
+---
+
+## 🔐 Authentication Model
+
+* Organizer login only
+* Session-based authentication
+* Backend handles authorization
+* App must verify session on load
+* No signup or password reset flows
+
+---
+
+## 📱 Core Functional Areas
+
+### 1. Organizer Dashboard
+
+* Displays events assigned to the organizer
+* Selecting an event opens attendance flow
+
+---
+
+### 2. Session Selection
+
+* Events can have multiple sessions
+* Organizer must select a session before attendance
+* Once selected, session is **locked**
+* Session info must remain visible at all times
+
+---
+
+### 3. Attendance Marking (Core Feature)
+
+#### Supported modes:
+
+* QR scan (primary)
+* Manual mark (fallback)
+
+#### Rules:
+
+* One scan per student per session
+* In/Out logic handled by backend
+* Duplicate scans must be safely blocked
+* No offline mode
+
+#### Visual Feedback:
+
+* White flash = success
+* Dark flash = error
+* Short vibration on scan
+* Status text shown briefly
+
+---
+
+### 4. Manual Attendance Override
+
+Used only when QR fails.
+
+* Search student
+* Mark present / remove attendance
+* Mandatory confirmation dialog
+* Reason selection required
+* Logged for audit
+
+---
+
+### 5. Preview Mode (Read-Only)
+
+* View registered participants
+* View attendance status
+* No modification allowed
+
+---
+
+### 6. Scan History
+
+* Show last 10 scans
+* Show student name, time, result
+* Local state only
+
+---
+
+### 7. Export
+
+* Export attendance data as Excel
+* One-click operation
+* Uses backend data
+
+---
+
+## 🧩 UI / UX RULES
+
+* Mobile-first
+* Large touch targets
+* No hover interactions
+* No animations beyond subtle transitions
+* Monochrome only (black, white, grey)
+* Clear visual hierarchy
+
+---
+
+## ⚙️ Technical Constraints
+
+* React (not React Native)
+* Tailwind CSS
+* TanStack Query for data fetching
+* No Redux
+* No offline mode
+* No experimental browser APIs
+
+---
+
+## 🚫 Explicitly Out of Scope
+
+* Student login
+* Admin dashboards
+* Payment handling
+* Role management
+* Offline support
+* Multi-device sync
+
+---
+
+## 🎯 End Goal
+
+A **fast, reliable, mistake-proof** attendance system that can be safely used by organizers in high-pressure environments like Anokha without confusion or errors , very responsive for mobile
