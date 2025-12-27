@@ -40,7 +40,7 @@ function SessionSelection() {
     if (isLoading) {
         return (
             <div className="min-h-screen bg-zinc-950 p-4 flex items-center justify-center">
-                <div className="text-zinc-400 animate-pulse">Loading sessions...</div>
+                <Loader />
             </div>
         )
     }

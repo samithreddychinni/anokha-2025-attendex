@@ -7,8 +7,11 @@ export default function Header() {
 
   return (
     <header className="px-4 py-3 flex items-center justify-between bg-black text-white border-b border-zinc-800">
-      <h1 className="text-lg font-bold tracking-tight">
-        <Link to="/">Anokha Organizer</Link>
+      <h1 className="text-lg font-bold tracking-tight flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-3">
+          <img src="/logo.png" alt="Anokha Logo" className="h-8 w-auto" />
+          <span>Anokha Organizer</span>
+        </Link>
       </h1>
 
       {isAuthenticated && (

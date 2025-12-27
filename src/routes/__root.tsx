@@ -1,12 +1,8 @@
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
 import { AuthProvider } from '../contexts/AuthContext'
 import { Toaster } from 'sonner'
 
 import Header from '../components/Header'
-
-import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
 import type { QueryClient } from '@tanstack/react-query'
 
@@ -16,22 +12,19 @@ interface MyRouterContext {
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
-    <AuthProvider>
-      <Header />
-      <Outlet />
-      <Toaster position="top-center" richColors />
-      <TanStackDevtools
-        config={{
-          position: 'bottom-right',
+    <>
+      <div
+        className="fixed inset-0 -z-10 pointer-events-none flex items-center justify-center opacity-10 bg-no-repeat bg-center"
+        style={{
+          backgroundImage: "url('/mascot-flag.webp')",
+          backgroundSize: "700px", // Making it small
         }}
-        plugins={[
-          {
-            name: 'Tanstack Router',
-            render: <TanStackRouterDevtoolsPanel />,
-          },
-          TanStackQueryDevtools,
-        ]}
       />
-    </AuthProvider>
+      <AuthProvider>
+        <Header />
+        <Outlet />
+        <Toaster position="top-center" richColors />
+      </AuthProvider>
+    </>
   ),
 })

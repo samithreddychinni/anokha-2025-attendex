@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import logo from '../logo.svg'
 
 export const Route = createFileRoute('/')({
-  component: App,
+  component: LoginComponent,
 })
 
 function App() {
