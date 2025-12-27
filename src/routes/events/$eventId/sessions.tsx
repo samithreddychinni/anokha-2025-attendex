@@ -87,9 +87,9 @@ function SessionSelection() {
                         No sessions scheduled for this event.
                     </div>
                 ) : (
-                    sessions.map(session => (
+                    sessions.map((session, index) => (
                         <Link
-                            key={session.id}
+                            key={session.id || index}
                             to={`/events/${eventId}/sessions/${session.id}/attendance` as any}
                             className="group block bg-card backdrop-blur-md border border-border rounded-2xl p-4 sm:p-5 hover:bg-muted/50 hover:border-ring transition-all active:scale-[0.98]"
                         >
