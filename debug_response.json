@@ -1,0 +1,50 @@
+{
+  "event": {
+    "id": "2cb81ef0-fe88-4f4b-bf74-f176c3fd5f8f",
+    "event_name": "Founders Breakfast Stout 9",
+    "blurb": "Yearly under highly weekly while where furniture each brilliance bouquet.",
+    "event_description": "Finally previously generally march tribe these on upon someone that. Strawberry anthology whose am tonight scold itself shall shower host. Wave fragile you there backwards too today here the me. Hourly pharmacy even spot today back cooperative simply away from. Luxury such did width these ourselves mine anger twist phew. Shirt Putinist did finally run her soon till to want. How crow us speed why it themselves occasion today consequently. Pounce before thoroughly any could why hiccup oops verb failure. With alas I that crew just toast what regularly frantic. For that out wait skip mob straightaway gorgeous choir line. None been onto that today dress chest everybody generally daily. Monthly are less staff dig pause sleepily in rather her. Cow someone person away luxuty her member early you other. When first hmm himself place does previously each life our. Will another in clever there always yourself this hourly each.",
+    "cover_image_url": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop",
+    "price": 2132921139,
+    "is_full": false,
+    "is_per_head": true,
+    "rules": "There describe tonight to are.",
+    "event_type": "WORKSHOP",
+    "is_group": false,
+    "max_teamsize": null,
+    "min_teamsize": null,
+    "event_status": "COMPLETED",
+    "event_mode": "OFFLINE",
+    "is_technical": false,
+    "organizers": [
+      {
+        "org_abbreviation": "CSE",
+        "org_type": "DEPARTMENT",
+        "organizer_name": "Computer Science and Engineering"
+      },
+      {
+        "org_abbreviation": "SHRU",
+        "org_type": "DEPARTMENT",
+        "organizer_name": "Shru Organizer"
+      }
+    ],
+    "schedules": [
+      {
+        "end_time": "2025-07-21T12:00:00",
+        "event_date": "2025-12-26",
+        "start_time": "2025-07-21T10:00:00",
+        "venue": "Sacramento"
+      }
+    ],
+    "tags": [
+      "packetTag9"
+    ],
+    "people": [
+      {
+        "person_name": "Talon Nitzsche",
+        "profession": null
+      }
+    ]
+  },
+  "message": "Event fetched successfully"
+}

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Calendar, Clock, MapPin, ChevronRight, Lock, AlertCircle } from 'lucide-react'
+import { Calendar, Clock, MapPin, ChevronRight, Lock, AlertCircle, Eye } from 'lucide-react'
 import api from '@/lib/api'
 import { formatDate, formatTime } from '@/lib/utils'
 
@@ -30,8 +30,7 @@ function SessionSelection() {
     const { data: event, isLoading, error } = useQuery({
         queryKey: ['event', eventId],
         queryFn: async () => {
-            // Using public endpoint because /events/admin/ is restricted to Admins.
-            // Organizer != Admin.
+            // Using authenticated endpoint to get full details including schedule IDs
             const res = await api.get(`/events/${eventId}`)
             // Success response: { event: { ... }, message: "..." }
             if (res.data.event) {
@@ -88,10 +87,11 @@ function SessionSelection() {
                     </div>
                 ) : (
                     sessions.map(session => (
+                        // Inside sessions.map(session => ( ...
                         <Link
-                            key={session.id}
-                            to={`/events/${eventId}/sessions/${session.id}/attendance` as any}
-                            className="group block bg-zinc-900/60 backdrop-blur-md border border-zinc-800 rounded-2xl p-4 sm:p-5 hover:bg-zinc-900/80 hover:border-zinc-700 transition-all active:scale-[0.98]"
+                            to={`/events/${eventId}/sessions/${session.id}/preview` as any}
+                            onClick={(e) => e.stopPropagation()}
+                        // ...
                         >
                             <div className="flex justify-between items-start gap-4">
                                 <div className="space-y-3">
@@ -116,10 +116,18 @@ function SessionSelection() {
                             </div>
 
                             <div className="mt-5 pt-4 border-t border-zinc-800/50 flex justify-between items-center">
-                                <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider group-hover:text-zinc-400 transition-colors">
-                                    Tap to Select
-                                </span>
-                                <Lock size={16} className="text-zinc-600 group-hover:text-indigo-400 transition-colors" />
+                                <Link
+                                    to={`/events/${eventId}/sessions/${session.id}/preview` as any}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="flex items-center gap-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/10"
+                                >
+                                    <Eye size={14} /> Preview List
+                                </Link>
+
+                                <div className="flex items-center gap-2 text-xs font-semibold text-indigo-400 uppercase tracking-wider">
+                                    <span className="group-hover:text-indigo-300 transition-colors">Select</span>
+                                    <Lock size={16} className="text-zinc-600 group-hover:text-indigo-400 transition-colors" />
+                                </div>
                             </div>
                         </Link>
                     ))

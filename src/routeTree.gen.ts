@@ -14,6 +14,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as EventsEventIdSessionsRouteImport } from './routes/events/$eventId/sessions'
+import { Route as EventsEventIdSessionsSessionIdPreviewRouteImport } from './routes/events/$eventId/sessions/$sessionId/preview'
 import { Route as EventsEventIdSessionsSessionIdAttendanceRouteImport } from './routes/events/$eventId/sessions/$sessionId/attendance'
 
 const LoginRoute = LoginRouteImport.update({
@@ -41,6 +42,12 @@ const EventsEventIdSessionsRoute = EventsEventIdSessionsRouteImport.update({
   path: '/events/$eventId/sessions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsEventIdSessionsSessionIdPreviewRoute =
+  EventsEventIdSessionsSessionIdPreviewRouteImport.update({
+    id: '/$sessionId/preview',
+    path: '/$sessionId/preview',
+    getParentRoute: () => EventsEventIdSessionsRoute,
+  } as any)
 const EventsEventIdSessionsSessionIdAttendanceRoute =
   EventsEventIdSessionsSessionIdAttendanceRouteImport.update({
     id: '/$sessionId/attendance',
@@ -55,6 +62,7 @@ export interface FileRoutesByFullPath {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/events/$eventId/sessions': typeof EventsEventIdSessionsRouteWithChildren
   '/events/$eventId/sessions/$sessionId/attendance': typeof EventsEventIdSessionsSessionIdAttendanceRoute
+  '/events/$eventId/sessions/$sessionId/preview': typeof EventsEventIdSessionsSessionIdPreviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -63,6 +71,7 @@ export interface FileRoutesByTo {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/events/$eventId/sessions': typeof EventsEventIdSessionsRouteWithChildren
   '/events/$eventId/sessions/$sessionId/attendance': typeof EventsEventIdSessionsSessionIdAttendanceRoute
+  '/events/$eventId/sessions/$sessionId/preview': typeof EventsEventIdSessionsSessionIdPreviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -72,6 +81,7 @@ export interface FileRoutesById {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/events/$eventId/sessions': typeof EventsEventIdSessionsRouteWithChildren
   '/events/$eventId/sessions/$sessionId/attendance': typeof EventsEventIdSessionsSessionIdAttendanceRoute
+  '/events/$eventId/sessions/$sessionId/preview': typeof EventsEventIdSessionsSessionIdPreviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -82,6 +92,7 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/events/$eventId/sessions'
     | '/events/$eventId/sessions/$sessionId/attendance'
+    | '/events/$eventId/sessions/$sessionId/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -90,6 +101,7 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/events/$eventId/sessions'
     | '/events/$eventId/sessions/$sessionId/attendance'
+    | '/events/$eventId/sessions/$sessionId/preview'
   id:
     | '__root__'
     | '/'
@@ -98,6 +110,7 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/events/$eventId/sessions'
     | '/events/$eventId/sessions/$sessionId/attendance'
+    | '/events/$eventId/sessions/$sessionId/preview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -145,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsEventIdSessionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/$eventId/sessions/$sessionId/preview': {
+      id: '/events/$eventId/sessions/$sessionId/preview'
+      path: '/$sessionId/preview'
+      fullPath: '/events/$eventId/sessions/$sessionId/preview'
+      preLoaderRoute: typeof EventsEventIdSessionsSessionIdPreviewRouteImport
+      parentRoute: typeof EventsEventIdSessionsRoute
+    }
     '/events/$eventId/sessions/$sessionId/attendance': {
       id: '/events/$eventId/sessions/$sessionId/attendance'
       path: '/$sessionId/attendance'
@@ -157,11 +177,14 @@ declare module '@tanstack/react-router' {
 
 interface EventsEventIdSessionsRouteChildren {
   EventsEventIdSessionsSessionIdAttendanceRoute: typeof EventsEventIdSessionsSessionIdAttendanceRoute
+  EventsEventIdSessionsSessionIdPreviewRoute: typeof EventsEventIdSessionsSessionIdPreviewRoute
 }
 
 const EventsEventIdSessionsRouteChildren: EventsEventIdSessionsRouteChildren = {
   EventsEventIdSessionsSessionIdAttendanceRoute:
     EventsEventIdSessionsSessionIdAttendanceRoute,
+  EventsEventIdSessionsSessionIdPreviewRoute:
+    EventsEventIdSessionsSessionIdPreviewRoute,
 }
 
 const EventsEventIdSessionsRouteWithChildren =
