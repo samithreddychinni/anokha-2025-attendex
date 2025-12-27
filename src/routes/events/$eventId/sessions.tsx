@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Calendar, Clock, MapPin, ChevronRight, Lock, AlertCircle } from 'lucide-react'
 import api from '@/lib/api'
 import { formatDate, formatTime } from '@/lib/utils'
-import { AuthGuard } from '@/components/AuthGuard'
+
 import Loader from '@/components/Loader'
 
 export const Route = createFileRoute('/events/$eventId/sessions')({
@@ -28,10 +28,15 @@ function SessionSelection() {
     const { eventId } = Route.useParams()
 
     const { data: event, isLoading, error } = useQuery({
+        queryKey: ['event', eventId],
         queryFn: async () => {
             // Using public endpoint because /events/admin/ is restricted to Admins.
             // Organizer != Admin.
             const res = await api.get(`/events/${eventId}`)
+            // Success response: { event: { ... }, message: "..." }
+            if (res.data.event) {
+                return res.data.event as EventDetail
+            }
             return (res.data.data || res.data) as EventDetail
         },
     })
@@ -72,7 +77,7 @@ function SessionSelection() {
                 <Link to="/dashboard" className="inline-flex items-center text-sm text-zinc-400 hover:text-white mb-4 transition-colors">
                     <ChevronRight className="rotate-180 mr-1" size={16} /> Back
                 </Link>
-                <h1 className="text-3xl font-bold text-white mb-2 leading-tight">{event.name}</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-white mb-2 leading-tight">{event.name}</h1>
                 <p className="text-zinc-400">Select a session to lock in and begin.</p>
             </div>
 
@@ -86,7 +91,7 @@ function SessionSelection() {
                         <Link
                             key={session.id}
                             to={`/events/${eventId}/sessions/${session.id}/attendance` as any}
-                            className="group block bg-zinc-900/60 backdrop-blur-md border border-zinc-800 rounded-2xl p-5 hover:bg-zinc-900/80 hover:border-zinc-700 transition-all active:scale-[0.98]"
+                            className="group block bg-zinc-900/60 backdrop-blur-md border border-zinc-800 rounded-2xl p-4 sm:p-5 hover:bg-zinc-900/80 hover:border-zinc-700 transition-all active:scale-[0.98]"
                         >
                             <div className="flex justify-between items-start gap-4">
                                 <div className="space-y-3">
@@ -94,7 +99,7 @@ function SessionSelection() {
                                         <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
                                             <Calendar size={18} />
                                         </div>
-                                        <span className="font-semibold text-white text-lg">{formatDate(session.event_date)}</span>
+                                        <span className="font-semibold text-white text-base sm:text-lg">{formatDate(session.event_date)}</span>
                                     </div>
 
                                     <div className="space-y-1.5 pl-1">
