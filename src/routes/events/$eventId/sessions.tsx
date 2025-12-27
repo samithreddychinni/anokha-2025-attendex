@@ -4,6 +4,7 @@ import { Calendar, Clock, MapPin, ChevronRight, Lock, AlertCircle } from 'lucide
 import api from '@/lib/api'
 import { formatDate, formatTime } from '@/lib/utils'
 import { AuthGuard } from '@/components/AuthGuard'
+import Loader from '@/components/Loader'
 
 export const Route = createFileRoute('/events/$eventId/sessions')({
     component: SessionSelection,
