@@ -24,30 +24,35 @@ export function LoginComponent() {
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="w-full max-w-md bg-zinc-900/40 backdrop-blur-md border border-zinc-800 rounded-xl p-6 shadow-xl">
-                <h2 className="text-2xl font-bold text-white mb-2">Organizer Login</h2>
-                <p className="text-zinc-400 mb-6">Enter your credentials to access the portal.</p>
+            <div className="w-full max-w-md bg-card/50 backdrop-blur-xl border border-border rounded-xl p-8 shadow-2xl">
+                <div className="flex flex-col items-center mb-6">
+                    <div className="bg-primary/10 p-3 rounded-full mb-4">
+                        <img src="/logo.png" alt="Anokha Logo" className="h-10 w-auto" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-card-foreground">Organizer Login</h2>
+                    <p className="text-muted-foreground text-center mt-2">Enter your credentials to access the portal.</p>
+                </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-zinc-300 mb-1">Email</label>
+                        <label className="block text-sm font-medium text-foreground mb-1">Email</label>
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-3 py-2 bg-black border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full px-3 py-2 bg-background border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm placeholder:text-muted-foreground/50"
                             placeholder="dept@amrita.edu"
                             required
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-zinc-300 mb-1">Password</label>
+                        <label className="block text-sm font-medium text-foreground mb-1">Password</label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-3 py-2 bg-black border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full px-3 py-2 bg-background border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm placeholder:text-muted-foreground/50"
                             placeholder="••••••••"
                             required
                         />
@@ -56,11 +61,11 @@ export function LoginComponent() {
                     <button
                         type="submit"
                         disabled={isSubmitting || isLoading}
-                        className="w-full bg-white text-black font-semibold py-2 px-4 rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-primary text-primary-foreground font-semibold py-2 px-4 rounded-lg hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow"
                     >
                         {isSubmitting ? (
                             <div className="flex items-center justify-center gap-2">
-                                <span className="w-4 h-4 border-2 border-zinc-500 border-t-zinc-900 rounded-full animate-spin" />
+                                <span className="w-4 h-4 border-2 border-background/20 border-t-background rounded-full animate-spin" />
                                 Logging in...
                             </div>
                         ) : 'Login'}

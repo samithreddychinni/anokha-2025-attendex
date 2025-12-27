@@ -24,11 +24,11 @@ function AttendancePage() {
 
     return (
         <AuthGuard>
-            <div className="min-h-screen bg-black text-white pb-20">
+            <div className="min-h-screen bg-background text-foreground pb-20">
                 {/* Header Area */}
-                <div className="p-4 border-b border-zinc-800 bg-zinc-900 sticky top-0 z-10">
+                <div className="p-4 border-b border-border bg-card sticky top-0 z-10">
                     <h2 className="font-bold text-lg">Mark Attendance</h2>
-                    <div className="flex gap-2 text-sm text-zinc-400">
+                    <div className="flex gap-2 text-sm text-muted-foreground">
                         <span>Session ID: {sessionId.slice(0, 8)}...</span>
                     </div>
                 </div>
@@ -40,8 +40,8 @@ function AttendancePage() {
                         className={cn(
                             "flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all",
                             activeTab === 'scan'
-                                ? "border-indigo-500 bg-indigo-500/10 text-white"
-                                : "border-zinc-800 bg-zinc-900 text-zinc-400"
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border bg-card text-muted-foreground hover:bg-muted/50"
                         )}
                     >
                         <QrCode size={24} className="mb-2" />
@@ -53,8 +53,8 @@ function AttendancePage() {
                         className={cn(
                             "flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all",
                             activeTab === 'manual'
-                                ? "border-indigo-500 bg-indigo-500/10 text-white"
-                                : "border-zinc-800 bg-zinc-900 text-zinc-400"
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border bg-card text-muted-foreground hover:bg-muted/50"
                         )}
                     >
                         <ClipboardList size={24} className="mb-2" />
@@ -66,14 +66,12 @@ function AttendancePage() {
                 <div className="px-4">
                     {activeTab === 'scan' ? (
                         <Scanner
-                            eventId={eventId}
                             sessionId={sessionId}
                             onScanResult={handleScanResult}
                             history={history}
                         />
                     ) : (
                         <ManualEntry
-                            eventId={eventId}
                             sessionId={sessionId}
                             onScanResult={handleScanResult}
                             />
@@ -82,7 +80,7 @@ function AttendancePage() {
 
                 {/* History Area */}
                 <div className="mt-8 px-4">
-                    <h3 className="text-zinc-500 text-sm uppercase tracking-wider font-bold mb-4">Recent Scans</h3>
+                    <h3 className="text-muted-foreground text-sm uppercase tracking-wider font-bold mb-4">Recent Scans</h3>
                     <ScanHistory history={history} />
                 </div>
             </div>
