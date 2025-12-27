@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Calendar, Clock, MapPin, ChevronRight, Lock, AlertCircle } from 'lucide-react'
 import api from '@/lib/api'
 import { formatDate, formatTime } from '@/lib/utils'
-import Loader from '@/components/Loader'
+import { AuthGuard } from '@/components/AuthGuard'
 
 export const Route = createFileRoute('/events/$eventId/sessions')({
     component: SessionSelection,

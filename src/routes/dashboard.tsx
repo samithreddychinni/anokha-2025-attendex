@@ -3,8 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Calendar, Users, ChevronRight, AlertCircle } from 'lucide-react'
 import api from '../lib/api'
 import { formatDate } from '../lib/utils'
-import Loader from '../components/Loader'
-
+import { AuthGuard } from '../components/AuthGuard'
 export const Route = createFileRoute('/dashboard')({
     component: Dashboard,
 })
