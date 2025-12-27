@@ -4,6 +4,7 @@ import { Calendar, Users, ChevronRight, AlertCircle } from 'lucide-react'
 import api from '../lib/api'
 import { formatDate } from '../lib/utils'
 import { AuthGuard } from '../components/AuthGuard'
+import Loader from '../components/Loader'
 export const Route = createFileRoute('/dashboard')({
     component: Dashboard,
 })
