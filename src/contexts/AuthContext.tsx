@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import api from '@/lib/api';
-import { useRouter } from '@tanstack/react-router';
 import { hashPassword } from '@/lib/utils';
-
+import { useRouter } from '@tanstack/react-router';
 // Basic Type for Organizer based on expected response
 interface Organizer {
     id: string;
@@ -49,15 +48,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const login = async (email: string, password: string) => {
         // Docs say POST /auth/organizer/login
         const hashedPassword = await hashPassword(password);
-        const { data } = await api.post('/auth/organizer/login', { email, password: hashedPassword });
+        console.log('Hashed Password:', hashedPassword);
+        const response = await api.post('/auth/organizer/login', { email, password: hashedPassword });
+        console.log('Login Response Status:', response.status);
+        console.log('Login Response Data:', response.data);
+        
+        const { data } = response;
 
         // Assuming login response returns user or we need to fetch session after
         // If response is just { message: "Success" }, fetch session immediately
         if (data.email) {
             setUser(data);
         } else {
+            console.log('Data.email missing, fetching session...');
             // Fetch session to be sure
             const session = await api.get('/auth/organizer/session');
+            console.log('Session fetch success:', session.data);
             setUser(session.data);
         }
         router.navigate({ to: '/dashboard' });
