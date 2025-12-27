@@ -4,6 +4,7 @@ import { Calendar, Users, ChevronRight, AlertCircle } from 'lucide-react'
 import api from '../lib/api'
 import { formatDate } from '../lib/utils'
 import Loader from '../components/Loader'
+import { useAuth } from '../contexts/AuthContext'
 export const Route = createFileRoute('/dashboard')({
     component: Dashboard,
 })
@@ -33,6 +34,8 @@ function Dashboard() {
             return (Array.isArray(data) ? data : []) as Event[]
         },
     })
+
+    const { user } = useAuth()
 
     if (isLoading) {
         return (
@@ -65,6 +68,13 @@ function Dashboard() {
     return (
         <div className="min-h-screen p-4 pb-24">
             <header className="mb-8 pt-4">
+                <h2 className="text-lg font-medium text-muted-foreground mb-1">
+                    Welcome, <span className="text-foreground font-semibold">
+                        {(user?.name || 'Organizer').length > 20 
+                            ? `${(user?.name || 'Organizer').slice(0, 20)}..` 
+                            : (user?.name || 'Organizer')}
+                    </span>
+                </h2>
                 <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Your Events</h1>
                 <p className="text-muted-foreground">Select an event to manage attendance.</p>
             </header>
@@ -97,11 +107,26 @@ function Dashboard() {
                         )}
 
                         <div className="p-5 relative">
-                            {/* Status Badge Example - optional logic */}
+                            {/* Status Badge */}
                             <div className="absolute top-4 right-4 z-10">
-                                <span className="bg-primary/90 backdrop-blur-sm text-primary-foreground text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm border border-primary/20">
-                                    Active
-                                </span>
+                                {(() => {
+                                    const status = event.event_date ? (
+                                        new Date(event.event_date).toDateString() === new Date().toDateString() ? 'ongoing' :
+                                        new Date(event.event_date) > new Date() ? 'upcoming' : 'completed'
+                                    ) : 'upcoming';
+                                    
+                                    const styles = {
+                                        ongoing: "bg-green-500/90 text-white border-green-500/20 shadow-green-500/20",
+                                        upcoming: "bg-blue-500/90 text-white border-blue-500/20 shadow-blue-500/20",
+                                        completed: "bg-slate-500/90 text-white border-slate-500/20 shadow-slate-500/20"
+                                    };
+
+                                    return (
+                                        <span className={`backdrop-blur-sm text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm border ${styles[status]}`}>
+                                            {status}
+                                        </span>
+                                    );
+                                })()}
                             </div>
 
                             <h3 className="text-lg md:text-xl font-bold text-card-foreground mb-3 pr-4 leading-tight">

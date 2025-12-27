@@ -11,7 +11,7 @@ export default function Header() {
       <h1 className="text-lg font-bold tracking-tight flex items-center gap-3">
         <Link to="/" className="flex items-center gap-3">
           <img src="/logo.png" alt="Anokha Logo" className="h-8 w-auto" />
-          <span>Anokha Organizer</span>
+          <span>Anokha AttendEx</span>
         </Link>
       </h1>
 
