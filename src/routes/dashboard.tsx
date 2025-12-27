@@ -1,9 +1,8 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Calendar, Users, ChevronRight, AlertCircle } from 'lucide-react'
 import api from '../lib/api'
 import { formatDate } from '../lib/utils'
-import { AuthGuard } from '../components/AuthGuard'
 import Loader from '../components/Loader'
 export const Route = createFileRoute('/dashboard')({
     component: Dashboard,
@@ -20,7 +19,6 @@ interface Event {
 }
 
 function Dashboard() {
-    const navigate = useNavigate()
 
     const { data: events, isLoading, error } = useQuery({
         queryKey: ['organizer-events'],
@@ -47,16 +45,16 @@ function Dashboard() {
     if (error) {
         return (
             <div className="min-h-screen p-4 flex flex-col items-center justify-center text-center">
-                <div className="bg-red-500/10 p-4 rounded-full mb-4">
-                    <AlertCircle className="text-red-500 w-8 h-8" />
+                <div className="bg-destructive/10 p-4 rounded-full mb-4">
+                    <AlertCircle className="text-destructive w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">Unavailable</h3>
-                <p className="text-zinc-400 mb-6 max-w-xs mx-auto">
+                <h3 className="text-xl font-bold text-foreground mb-2">Unavailable</h3>
+                <p className="text-muted-foreground mb-6 max-w-xs mx-auto">
                     Could not load your assigned events. Please try again.
                 </p>
                 <button
                     onClick={() => window.location.reload()}
-                    className="px-6 py-3 bg-white text-black font-bold rounded-xl active:scale-95 transition-transform"
+                    className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl active:scale-95 transition-transform"
                 >
                     Retry
                 </button>
@@ -67,14 +65,14 @@ function Dashboard() {
     return (
         <div className="min-h-screen p-4 pb-24">
             <header className="mb-8 pt-4">
-                <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Your Events</h1>
-                <p className="text-zinc-400">Select an event to manage attendance.</p>
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Your Events</h1>
+                <p className="text-muted-foreground">Select an event to manage attendance.</p>
             </header>
 
             {(!events || events.length === 0) && (
-                <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800 rounded-2xl p-8 text-center">
-                    <p className="text-zinc-300 font-medium mb-2">No Events Assigned</p>
-                    <p className="text-sm text-zinc-500">
+                <div className="bg-card backdrop-blur-md border border-border rounded-2xl p-8 text-center text-card-foreground">
+                    <p className="text-muted-foreground font-medium mb-2">No Events Assigned</p>
+                    <p className="text-sm text-muted-foreground/80">
                         Contact an administrator if you believe this is an error.
                     </p>
                 </div>
@@ -85,49 +83,49 @@ function Dashboard() {
                     <Link
                         key={event.id}
                         to={`/events/${event.id}/sessions` as any}
-                        className="group relative block bg-zinc-900/60 backdrop-blur-md border border-zinc-800 rounded-2xl overflow-hidden active:scale-[0.98] transition-all hover:bg-zinc-900/80 hover:border-zinc-700"
+                        className="group relative block bg-card backdrop-blur-md border border-border rounded-2xl overflow-hidden active:scale-[0.98] transition-all hover:bg-muted/50 hover:border-ring"
                     >
                         {event.poster_url && (
-                            <div className="h-32 w-full bg-zinc-800 overflow-hidden relative">
+                            <div className="h-32 w-full bg-muted overflow-hidden relative">
                                 <img
                                     src={event.poster_url}
                                     alt={event.name}
                                     className="w-full h-full object-cover opacity-80 transition-opacity group-hover:opacity-100"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/90 to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
                             </div>
                         )}
 
                         <div className="p-5 relative">
                             {/* Status Badge Example - optional logic */}
-                            <div className="absolute top-0 right-5 -translate-y-1/2 z-10">
-                                <span className="bg-indigo-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg whitespace-nowrap">
+                            <div className="absolute top-4 right-4 z-10">
+                                <span className="bg-primary/90 backdrop-blur-sm text-primary-foreground text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm border border-primary/20">
                                     Active
                                 </span>
                             </div>
 
-                            <h3 className="text-lg md:text-xl font-bold text-white mb-3 pr-4 leading-tight">
+                            <h3 className="text-lg md:text-xl font-bold text-card-foreground mb-3 pr-4 leading-tight">
                                 {event.name}
                             </h3>
 
-                            <div className="space-y-2.5 text-sm text-zinc-400">
+                            <div className="space-y-2.5 text-sm text-muted-foreground">
                                 {event.event_date && (
                                     <div className="flex items-center gap-2.5">
-                                        <Calendar size={16} className="text-zinc-500" />
+                                        <Calendar size={16} className="text-muted-foreground" />
                                         <span className="font-medium">{formatDate(event.event_date)}</span>
                                     </div>
                                 )}
                                 {event.venue && (
                                     <div className="flex items-center gap-2.5">
-                                        <Users size={16} className="text-zinc-500" />
+                                        <Users size={16} className="text-muted-foreground" />
                                         <span className="font-medium">{event.venue}</span>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="mt-6 flex items-center justify-between text-white font-semibold">
+                            <div className="mt-6 flex items-center justify-between text-card-foreground font-semibold">
                                 <span>Select Event</span>
-                                <div className="bg-white/10 p-2 rounded-full group-hover:bg-white/20 transition-colors">
+                                <div className="bg-muted p-2 rounded-full group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                                     <ChevronRight size={20} />
                                 </div>
                             </div>

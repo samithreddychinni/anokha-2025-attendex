@@ -3,16 +3,15 @@ import { useState, useRef } from 'react'
 import QrReader from 'react-qr-scanner'
 import { toast } from 'sonner'
 import api from '@/lib/api'
-import { ScanResult } from './ScanHistory'
+import type { ScanResult } from './ScanHistory'
 
 interface ScannerProps {
-    eventId: string
     sessionId: string
     onScanResult: (result: ScanResult) => void
     history: ScanResult[]
 }
 
-export function Scanner({ eventId, sessionId, onScanResult, history }: ScannerProps) {
+export function Scanner({ sessionId, onScanResult, history }: ScannerProps) {
     const [isProcessing, setIsProcessing] = useState(false)
     const lastScanRef = useRef<string | null>(null)
     const [cameraError, setCameraError] = useState(false)
