@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Calendar, Clock, MapPin, ArrowRight } from 'lucide-react'
 import api from '@/lib/api'
 import { formatDate, formatTime } from '@/lib/utils'
+import { AuthGuard } from '@/components/AuthGuard'
 
 export const Route = createFileRoute('/events/$eventId/sessions')({
     component: SessionSelection,
@@ -55,46 +56,48 @@ function SessionSelection() {
     const sessions = event.schedules || []
 
     return (
-        <div className="min-h-screen bg-zinc-950 p-4 pb-20">
-            <div className="mb-6">
-                <Link to="/dashboard" className="text-sm text-zinc-500 mb-2 block hover:text-white">&larr; Back to Dashboard</Link>
-                <h1 className="text-2xl font-bold text-white">{event.name}</h1>
-                <p className="text-zinc-400">Select a session to begin</p>
-            </div>
+        <AuthGuard>
+            <div className="min-h-screen bg-zinc-950 p-4 pb-20">
+                <div className="mb-6">
+                    <Link to="/dashboard" className="text-sm text-zinc-500 mb-2 block hover:text-white">&larr; Back to Dashboard</Link>
+                    <h1 className="text-2xl font-bold text-white">{event.name}</h1>
+                    <p className="text-zinc-400">Select a session to begin</p>
+                </div>
 
-            <div className="space-y-4">
-                {sessions.length === 0 ? (
-                    <div className="p-4 bg-zinc-900 rounded-lg text-zinc-500 text-center">
-                        No sessions scheduled for this event.
-                    </div>
-                ) : (
-                    sessions.map(session => (
-                        <Link
-                            key={session.id}
-                            to={`/events/${eventId}/sessions/${session.id}/attendance` as any}
-                            className="block bg-zinc-900 border border-zinc-800 rounded-xl p-4 hover:border-zinc-600 transition-colors"
-                        >
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <div className="flex items-center gap-2 text-white font-semibold mb-1">
-                                        <Calendar size={16} className="text-indigo-400" />
-                                        <span>{formatDate(session.event_date)}</span>
+                <div className="space-y-4">
+                    {sessions.length === 0 ? (
+                        <div className="p-4 bg-zinc-900 rounded-lg text-zinc-500 text-center">
+                            No sessions scheduled for this event.
+                        </div>
+                    ) : (
+                        sessions.map(session => (
+                            <Link
+                                key={session.id}
+                                to={`/events/${eventId}/sessions/${session.id}/attendance` as any}
+                                className="block bg-zinc-900 border border-zinc-800 rounded-xl p-4 hover:border-zinc-600 transition-colors"
+                            >
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <div className="flex items-center gap-2 text-white font-semibold mb-1">
+                                            <Calendar size={16} className="text-indigo-400" />
+                                            <span>{formatDate(session.event_date)}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-zinc-400 text-sm mb-1">
+                                            <Clock size={16} />
+                                            <span>{formatTime(session.start_time)} - {formatTime(session.end_time)}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-zinc-400 text-sm">
+                                            <MapPin size={16} />
+                                            <span>{session.venue}</span>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2 text-zinc-400 text-sm mb-1">
-                                        <Clock size={16} />
-                                        <span>{formatTime(session.start_time)} - {formatTime(session.end_time)}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-zinc-400 text-sm">
-                                        <MapPin size={16} />
-                                        <span>{session.venue}</span>
-                                    </div>
+                                    <ArrowRight className="text-zinc-600" />
                                 </div>
-                                <ArrowRight className="text-zinc-600" />
-                            </div>
-                        </Link>
-                    ))
-                )}
+                            </Link>
+                        ))
+                    )}
+                </div>
             </div>
-        </div>
+        </AuthGuard>
     )
 }
