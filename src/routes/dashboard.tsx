@@ -67,7 +67,7 @@ function Dashboard() {
     return (
         <div className="min-h-screen p-4 pb-24">
             <header className="mb-8 pt-4">
-                <h1 className="text-3xl font-bold text-white mb-2">Your Events</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Your Events</h1>
                 <p className="text-zinc-400">Select an event to manage attendance.</p>
             </header>
 
@@ -100,13 +100,13 @@ function Dashboard() {
 
                         <div className="p-5 relative">
                             {/* Status Badge Example - optional logic */}
-                            <div className="absolute top-0 right-5 -translate-y-1/2">
-                                <span className="bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shadow-lg">
+                            <div className="absolute top-0 right-5 -translate-y-1/2 z-10">
+                                <span className="bg-indigo-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg whitespace-nowrap">
                                     Active
                                 </span>
                             </div>
 
-                            <h3 className="text-xl font-bold text-white mb-3 pr-4 leading-tight">
+                            <h3 className="text-lg md:text-xl font-bold text-white mb-3 pr-4 leading-tight">
                                 {event.name}
                             </h3>
 
