@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Calendar, Clock, MapPin, ArrowRight } from 'lucide-react'
 import api from '@/lib/api'
 import { formatDate, formatTime } from '@/lib/utils'
+import Loader from '@/components/Loader'
 
 export const Route = createFileRoute('/events/$eventId/sessions')({
     component: SessionSelection,
@@ -39,7 +40,7 @@ function SessionSelection() {
     if (isLoading) {
         return (
             <div className="min-h-screen bg-zinc-950 p-4 flex items-center justify-center">
-                <div className="text-zinc-400 animate-pulse">Loading sessions...</div>
+                <Loader />
             </div>
         )
     }
@@ -55,7 +56,7 @@ function SessionSelection() {
     const sessions = event.schedules || []
 
     return (
-        <div className="min-h-screen bg-zinc-950 p-4 pb-20">
+        <div className="min-h-screen p-4 pb-20">
             <div className="mb-6">
                 <Link to="/dashboard" className="text-sm text-zinc-500 mb-2 block hover:text-white">&larr; Back to Dashboard</Link>
                 <h1 className="text-2xl font-bold text-white">{event.name}</h1>

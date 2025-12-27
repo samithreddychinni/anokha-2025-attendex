@@ -22,7 +22,7 @@ function AttendancePage() {
     }
 
     return (
-        <div className="min-h-screen bg-black text-white pb-20">
+        <div className="min-h-screen text-white pb-20">
             {/* Header Area */}
             <div className="p-4 border-b border-zinc-800 bg-zinc-900 sticky top-0 z-10">
                 <h2 className="font-bold text-lg">Mark Attendance</h2>

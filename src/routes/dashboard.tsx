@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Calendar, Users, ArrowRight } from 'lucide-react'
 import api from '../lib/api'
 import { formatDate } from '../lib/utils'
+import Loader from '../components/Loader'
 
 export const Route = createFileRoute('/dashboard')({
     component: Dashboard,
@@ -36,7 +37,7 @@ function Dashboard() {
     if (isLoading) {
         return (
             <div className="min-h-screen bg-zinc-950 p-4 flex items-center justify-center">
-                <div className="text-zinc-400 animate-pulse">Loading events...</div>
+                <Loader />
             </div>
         )
     }
@@ -57,7 +58,7 @@ function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-zinc-950 p-4 pb-20">
+        <div className="min-h-screen p-4 pb-20">
             <h1 className="text-2xl font-bold text-white mb-6">Assigned Events</h1>
 
             {(!events || events.length === 0) && (
