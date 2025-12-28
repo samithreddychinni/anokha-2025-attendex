@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Calendar, Users, ChevronRight, AlertCircle } from 'lucide-react'
+import { Users, ChevronRight, AlertCircle } from 'lucide-react'
 import api from '../lib/api'
 import { formatDate } from '../lib/utils'
 import Loader from '../components/Loader'
@@ -17,6 +17,7 @@ interface Event {
     event_date?: string
     venue?: string
     poster_url?: string
+    is_group?: string
 }
 
 function Dashboard() {
@@ -108,7 +109,15 @@ function Dashboard() {
 
                         <div className="p-5 relative">
                             {/* Status Badge */}
-                            <div className="absolute top-4 right-4 z-10">
+                            <div className="absolute top-4 right-4 z-10 flex gap-2">
+                                {event.is_group && (
+                                    <span className={`backdrop-blur-sm text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm border ${event.is_group === 'SOLO'
+                                        ? "bg-purple-500/90 text-white border-purple-500/20 shadow-purple-500/20"
+                                        : "bg-orange-500/90 text-white border-orange-500/20 shadow-orange-500/20"
+                                        }`}>
+                                        {event.is_group}
+                                    </span>
+                                )}
                                 {(() => {
                                     const status = event.event_date ? (
                                         new Date(event.event_date).toDateString() === new Date().toDateString() ? 'ongoing' :
@@ -129,17 +138,16 @@ function Dashboard() {
                                 })()}
                             </div>
 
-                            <h3 className="text-lg md:text-xl font-bold text-card-foreground mb-3 pr-4 leading-tight">
+                            <h3 className="text-lg md:text-xl font-bold text-card-foreground mb-1 pr-4 leading-tight">
                                 {event.name}
                             </h3>
+                            {event.event_date && (
+                                <p className="text-sm text-muted-foreground mb-3">
+                                    {formatDate(event.event_date)}
+                                </p>
 
+                            )}
                             <div className="space-y-2.5 text-sm text-muted-foreground">
-                                {event.event_date && (
-                                    <div className="flex items-center gap-2.5">
-                                        <Calendar size={16} className="text-muted-foreground" />
-                                        <span className="font-medium">{formatDate(event.event_date)}</span>
-                                    </div>
-                                )}
                                 {event.venue && (
                                     <div className="flex items-center gap-2.5">
                                         <Users size={16} className="text-muted-foreground" />
@@ -148,9 +156,9 @@ function Dashboard() {
                                 )}
                             </div>
 
-                            <div className="mt-6 flex items-center justify-between text-card-foreground font-semibold">
-                                <span>View Details</span>
-                                <div className="bg-muted p-2 rounded-full group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                            <div className="mt-6 flex items-center justify-end text-card-foreground font-semibold">
+
+                                <div className="bg-muted p-2 rounded-full group-hover:bg-primary/10 group-hover:text-primary transition-colors ml-auto">
                                     <ChevronRight size={20} />
                                 </div>
                             </div>

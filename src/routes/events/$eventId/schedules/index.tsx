@@ -20,44 +20,34 @@ interface Schedule {
   venue: string
 }
 
+import { Calendar } from 'lucide-react'
+import { formatDate } from '@/lib/utils'
+
+// ...
+
 interface EventData {
   event_id: string
   event_name: string
+  event_description?: string
+  event_date?: string
+  is_group?: boolean | string
+  event_type?: string
   schedules?: Schedule[]
 }
 
 function ScheduleSelection() {
   const { eventId } = Route.useParams()
   const navigate = useNavigate()
-
-  // State
   const [selectedScheduleId, setSelectedScheduleId] = useState<string | null>(null)
-
-  // // Fetch Data
-  // const { data: event, isLoading, error } = useQuery({
-  //   queryKey: ['events', eventId, 'schedules'],
-  //   enabled: !!eventId,
-  //   queryFn: async () => {
-  //     const res = await api.get('/')
-  //     console.log('Fetching schedules for event:', eventId, 'Response:', res.data) // Debug log
-
-  //     const allEvents = (res.data.events || res.data || []) as EventData[]
-  //     // Ensure strict string comparison to avoid type mismatches
-  //     const foundEvent = allEvents.find(e => String(e.id) === String(eventId))
-
-  //     if (!foundEvent) {
-  //       console.error('Event not found in list. Available IDs:', allEvents.map(e => e.id))
-  //       throw new Error('Event not found')
-  //     }
-  //     return foundEvent
-  //   }
-  // })
 
   const mockEventsResponse = {
     "events": [
       {
         "event_id": "ca12c02c-32ca-4568-8250-f63c516747e0",
         "event_name": "Chimay Grande Réserve 7",
+        "event_description": "A classic Trappist ale with a light floral rosy flowery fragrance.",
+        "event_date": "2025-12-28T00:00:00Z",
+        "event_type": "Workshop",
         "is_group": false,
         "schedules": [
           {
@@ -72,6 +62,9 @@ function ScheduleSelection() {
       {
         "event_id": "449ac1f6-b4de-48d7-8287-6b22ec7c8e5b",
         "event_name": "St. Bernardus Abt 12 9",
+        "event_description": "Dark brown, full-bodied, complex ale.",
+        "event_date": "2025-12-29T10:00:00Z",
+        "event_type": "Competition",
         "is_group": false,
         "schedules": [
           {
@@ -86,7 +79,10 @@ function ScheduleSelection() {
       {
         "event_id": "842237b0-0e4e-4de4-9caf-35c738b80054",
         "event_name": "Tech Workshop",
-        "is_group": false,
+        "event_description": "Hands-on session on modern web technologies.",
+        "event_date": "2025-12-28T09:00:00Z",
+        "event_type": "Workshop",
+        "is_group": "SOLO",
         "schedules": [
           {
             "end_time": "2025-07-21T12:00:00",
@@ -100,6 +96,9 @@ function ScheduleSelection() {
       {
         "event_id": "d6f14e6d-6627-400d-8b97-593877aabf82",
         "event_name": "Ten FIDY 5",
+        "event_description": "Imperial Stout - immense viscosity and rich chocolate.",
+        "event_date": "2025-01-15T18:00:00Z",
+        "event_type": "Tasting",
         "is_group": true,
         "schedules": [
           {
@@ -114,6 +113,9 @@ function ScheduleSelection() {
       {
         "event_id": "4418e0a0-7357-4f3a-8c85-4b5e5d948c4f",
         "event_name": "Two Hearted Ale 3",
+        "event_description": "Those roughly with fortnightly which paint here has significant ever.",
+        "event_date": "2025-12-28T00:00:00Z",
+        "event_type": "WORKSHOP",
         "is_group": true,
         "schedules": [
           {
@@ -146,7 +148,6 @@ function ScheduleSelection() {
     }
   }
 
-  // Loading State
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -155,7 +156,6 @@ function ScheduleSelection() {
     )
   }
 
-  // Error State
   if (error || !event) {
     return (
       <div className="min-h-screen p-4 flex flex-col items-center justify-center text-center">
@@ -171,6 +171,11 @@ function ScheduleSelection() {
 
   const schedules = event.schedules || []
 
+  // Format is_group display
+  const groupLabel = typeof event.is_group === 'string'
+    ? event.is_group
+    : (event.is_group ? 'GROUP' : 'SOLO');
+
   return (
     <div className="min-h-screen bg-background pb-24 relative">
 
@@ -179,8 +184,41 @@ function ScheduleSelection() {
           <Link to="/dashboard" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
             <ChevronRight className="rotate-180 mr-1" size={16} /> Back to Events
           </Link>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{event.event_name}</h1>
-          <p className="text-muted-foreground">Select a schedule to begin tracking attendance.</p>
+
+          <div className="space-y-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border ${groupLabel === 'GROUP'
+                  ? "bg-orange-500/10 text-orange-600 border-orange-500/20"
+                  : "bg-purple-500/10 text-purple-600 border-purple-500/20"
+                  }`}>
+                  {groupLabel}
+                </span>
+                {event.event_type && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-blue-500/10 text-blue-600 border border-blue-500/20">
+                    {event.event_type}
+                  </span>
+                )}
+              </div>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1">{event.event_name}</h1>
+              {event.event_description && (
+                <p className="text-muted-foreground text-sm line-clamp-2">{event.event_description}</p>
+              )}
+            </div>
+
+            {event.event_date && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-secondary/30 p-3 rounded-xl border border-secondary">
+                <Calendar size={16} />
+                <span className="font-medium">{formatDate(event.event_date)}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="h-px bg-border my-6"></div>
+
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+            Select Schedule
+          </h2>
         </div>
 
         {/* Schedules List */}
