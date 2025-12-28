@@ -11,13 +11,17 @@ export const Route = createFileRoute('/events/$eventId/schedules/$scheduleId/pre
 
 // Types based on potential API response
 interface Participant {
-  id?: string
-  reg_id?: string
-  register_id?: string
-  name?: string
+  attendance_id?: number
+  student_id?: string
   student_name?: string
-  roll_number?: string
-  roll_no?: string
+  student_email?: string
+  check_in?: string | null
+  check_out?: string | null
+
+  // Fallbacks (legacy or alternative)
+  id?: string
+  name?: string
+  email?: string
   status?: 'present' | 'absent'
 }
 
@@ -31,7 +35,7 @@ function PreviewPage() {
       const res = await api.get(`/attendance/list/${eventId}/${scheduleId}`)
       console.log('Preview Data Response:', res.data)
       // Handle various response structures
-      const data = res.data.participants || res.data.data || res.data || []
+      const data = res.data.participants || res.data.data || res.data
       return (Array.isArray(data) ? data : []) as Participant[]
     }
   })
@@ -86,18 +90,18 @@ function PreviewPage() {
             </div>
           ) : (
             list.map((p, i) => (
-              <div key={p.id || p.reg_id || i} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between opacity-90">
+              <div key={p.student_id || p.id || i} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between opacity-90">
                 <div>
-                  <p className="font-semibold text-foreground">{p.name || p.student_name || 'Unknown Name'}</p>
+                  <p className="font-semibold text-foreground">{p.student_name || p.name || 'Unknown Name'}</p>
                   <p className="text-xs text-muted-foreground">
-                    {p.reg_id || p.register_id || 'No ID'} • {p.roll_number || p.roll_no || 'No Roll No'}
+                    {p.student_email || p.email || 'No Email Provided'}
                   </p>
                 </div>
-                <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${(p.status || '').toLowerCase() === 'present'
+                <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${(p.status === 'present' || p.check_in)
                     ? 'bg-green-500/10 text-green-600 border border-green-500/20'
-                    : 'bg-red-500/10 text-red-600 border border-red-500/20'
+                    : 'bg-secondary text-muted-foreground border border-border'
                   }`}>
-                  {p.status || 'Absent'}
+                  {p.status || (p.check_in ? 'Present' : 'Registered')}
                 </div>
               </div>
             ))
