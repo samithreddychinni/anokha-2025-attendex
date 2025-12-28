@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log('Session fetch success:', session.data);
             setUser(session.data);
         }
-        router.navigate({ to: '/dashboard' });
+        // router.navigate({ to: '/dashboard' }); // Removed to allow caller to handle navigation (e.g. replace: true)
     };
 
     const logout = async () => {

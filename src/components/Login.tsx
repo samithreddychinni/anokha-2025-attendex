@@ -1,12 +1,21 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'sonner'
 
 export function LoginComponent() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const { login, isLoading } = useAuth()
+    const { login, isLoading, user } = useAuth()
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const navigate = useNavigate()
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (user && !isLoading) {
+            navigate({ to: '/events', replace: true } as any)
+        }
+    }, [user, isLoading, navigate])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -14,6 +23,7 @@ export function LoginComponent() {
         try {
             await login(email, password)
             toast.success('Logged in successfully')
+            navigate({ to: '/events', replace: true } as any)
         } catch (error) {
             toast.error('Invalid credentials')
             console.error(error)
