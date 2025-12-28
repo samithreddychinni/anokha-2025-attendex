@@ -5,8 +5,6 @@ import { ChevronRight, AlertCircle } from 'lucide-react'
 import api from '@/lib/api'
 import Loader from '@/components/Loader'
 import { ScheduleCard } from '@/components/ScheduleCard'
-import { LockedScheduleBar } from '@/components/LockedScheduleBar'
-import { ConfirmationModal } from '@/components/ConfirmationModal'
 
 // Define the route
 export const Route = createFileRoute('/events/$eventId/schedules/')({
@@ -34,8 +32,6 @@ function ScheduleSelection() {
 
   // State
   const [selectedScheduleId, setSelectedScheduleId] = useState<string | null>(null)
-  const [lockedSchedule, setLockedSchedule] = useState<Schedule | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // // Fetch Data
   // const { data: event, isLoading, error } = useQuery({
@@ -138,34 +134,15 @@ function ScheduleSelection() {
 
   const isLoading = false
   const error = null
+
   // Handlers
   const handleSelect = (scheduleId: string) => {
-    if (lockedSchedule) return
     setSelectedScheduleId(scheduleId)
   }
 
-  const handleLock = () => {
-    if (!selectedScheduleId || !event?.schedules) return
-    const schedule = event.schedules.find(s => s.id === selectedScheduleId)
-    if (schedule) {
-      setLockedSchedule(schedule)
-    }
-  }
-
-  const handleChangeScheduleRequest = () => {
-    setIsModalOpen(true)
-  }
-
-  const handleConfirmChange = () => {
-    setLockedSchedule(null)
-    setSelectedScheduleId(null)
-    setIsModalOpen(false)
-  }
-
-  const handleProceed = () => {
-    if (lockedSchedule) {
-      // Navigate to attendance page or next step
-      navigate({ to: `/events/${eventId}/schedules/${lockedSchedule.id}/attendance` } as any)
+  const handleStartAttendance = () => {
+    if (selectedScheduleId) {
+      navigate({ to: `/events/${eventId}/schedules/${selectedScheduleId}/attendance` } as any)
     }
   }
 
@@ -196,31 +173,18 @@ function ScheduleSelection() {
 
   return (
     <div className="min-h-screen bg-background pb-24 relative">
-      {/* Locked Bar */}
-      {lockedSchedule && (
-        <LockedScheduleBar
-          eventName={event.event_name}
-          scheduleDate={lockedSchedule.event_date}
-          startTime={lockedSchedule.start_time}
-          endTime={lockedSchedule.end_time}
-          onChangeSchedule={handleChangeScheduleRequest}
-        />
-      )}
 
       <div className="p-4 pt-6">
-        {/* Header (Only show if not locked to reduce clutter, or keep for context? Requirement says "Persistent schedule Bar" serves as context. Let's hide big header if locked to focus on task) */}
-        {!lockedSchedule && (
-          <div className="mb-6">
-            <Link to="/dashboard" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
-              <ChevronRight className="rotate-180 mr-1" size={16} /> Back to Events
-            </Link>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{event.event_name}</h1>
-            <p className="text-muted-foreground">Select a schedule to begin tracking attendance.</p>
-          </div>
-        )}
+        <div className="mb-6">
+          <Link to="/dashboard" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
+            <ChevronRight className="rotate-180 mr-1" size={16} /> Back to Events
+          </Link>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{event.event_name}</h1>
+          <p className="text-muted-foreground">Select a schedule to begin tracking attendance.</p>
+        </div>
 
         {/* Schedules List */}
-        <div className={`space-y-4 transition-opacity duration-300 ${lockedSchedule ? 'opacity-50 pointer-events-none grayscale-[0.5]' : ''}`}>
+        <div className="space-y-4">
           {schedules.length === 0 ? (
             <div className="text-center p-8 border border-dashed rounded-2xl text-muted-foreground">
               No schedules found for this event.
@@ -237,30 +201,12 @@ function ScheduleSelection() {
           )}
         </div>
 
-        {/* Floating "Lock & Continue" Button for selection phase */}
-        {!lockedSchedule && selectedScheduleId && (
+        {/* Floating "Start Attendance" Button */}
+        {selectedScheduleId && (
           <div className="fixed bottom-6 left-4 right-4 z-40 animate-in slide-in-from-bottom-4">
             <button
-              onClick={handleLock}
+              onClick={handleStartAttendance}
               className="w-full bg-primary text-primary-foreground font-bold p-4 rounded-xl shadow-lg shadow-primary/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-            >
-              <span>Lock Schedule</span>
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        )}
-
-        {/* "Proceed to Attendance" Button if Locked (or maybe we just show the attendance view? The prompt says "Locked schedule selection flow... ensures correct context before attendance begins". 
-                     So after locking, we probably stay here or show the attendance UI. 
-                     "No attendance allowed until schedule is locked". 
-                     I will add a specific "Start Attendance" button after locking, or maybe the "Attendance" UI appears below. 
-                     Let's add a "Start Attendance" button for now to navigate to the preview/attendance page.
-                  */}
-        {lockedSchedule && (
-          <div className="fixed bottom-6 left-4 right-4 z-40 animate-in slide-in-from-bottom-4">
-            <button
-              onClick={handleProceed}
-              className="w-full bg-green-600 text-white font-bold p-4 rounded-xl shadow-lg shadow-green-600/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
               <span>Start Attendance</span>
               <ChevronRight size={20} />
@@ -268,14 +214,6 @@ function ScheduleSelection() {
           </div>
         )}
       </div>
-
-      <ConfirmationModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onConfirm={handleConfirmChange}
-        title="Change Schedule?"
-        description="Changing the schedule will reset your current selection. You will need to select and lock a schedule again."
-      />
     </div>
   )
 }
