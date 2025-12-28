@@ -14,6 +14,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as EventsEventIdSchedulesIndexRouteImport } from './routes/events/$eventId/schedules/index'
+import { Route as EventsEventIdSchedulesScheduleIdPreviewRouteImport } from './routes/events/$eventId/schedules/$scheduleId/preview'
 import { Route as EventsEventIdSchedulesScheduleIdAttendanceRouteImport } from './routes/events/$eventId/schedules/$scheduleId/attendance'
 
 const LoginRoute = LoginRouteImport.update({
@@ -42,6 +43,12 @@ const EventsEventIdSchedulesIndexRoute =
     path: '/events/$eventId/schedules/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const EventsEventIdSchedulesScheduleIdPreviewRoute =
+  EventsEventIdSchedulesScheduleIdPreviewRouteImport.update({
+    id: '/events/$eventId/schedules/$scheduleId/preview',
+    path: '/events/$eventId/schedules/$scheduleId/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EventsEventIdSchedulesScheduleIdAttendanceRoute =
   EventsEventIdSchedulesScheduleIdAttendanceRouteImport.update({
     id: '/events/$eventId/schedules/$scheduleId/attendance',
@@ -56,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/events/$eventId/schedules': typeof EventsEventIdSchedulesIndexRoute
   '/events/$eventId/schedules/$scheduleId/attendance': typeof EventsEventIdSchedulesScheduleIdAttendanceRoute
+  '/events/$eventId/schedules/$scheduleId/preview': typeof EventsEventIdSchedulesScheduleIdPreviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -64,6 +72,7 @@ export interface FileRoutesByTo {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/events/$eventId/schedules': typeof EventsEventIdSchedulesIndexRoute
   '/events/$eventId/schedules/$scheduleId/attendance': typeof EventsEventIdSchedulesScheduleIdAttendanceRoute
+  '/events/$eventId/schedules/$scheduleId/preview': typeof EventsEventIdSchedulesScheduleIdPreviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -73,6 +82,7 @@ export interface FileRoutesById {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/events/$eventId/schedules/': typeof EventsEventIdSchedulesIndexRoute
   '/events/$eventId/schedules/$scheduleId/attendance': typeof EventsEventIdSchedulesScheduleIdAttendanceRoute
+  '/events/$eventId/schedules/$scheduleId/preview': typeof EventsEventIdSchedulesScheduleIdPreviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -83,6 +93,7 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/events/$eventId/schedules'
     | '/events/$eventId/schedules/$scheduleId/attendance'
+    | '/events/$eventId/schedules/$scheduleId/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -91,6 +102,7 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/events/$eventId/schedules'
     | '/events/$eventId/schedules/$scheduleId/attendance'
+    | '/events/$eventId/schedules/$scheduleId/preview'
   id:
     | '__root__'
     | '/'
@@ -99,6 +111,7 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/events/$eventId/schedules/'
     | '/events/$eventId/schedules/$scheduleId/attendance'
+    | '/events/$eventId/schedules/$scheduleId/preview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -108,6 +121,7 @@ export interface RootRouteChildren {
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   EventsEventIdSchedulesIndexRoute: typeof EventsEventIdSchedulesIndexRoute
   EventsEventIdSchedulesScheduleIdAttendanceRoute: typeof EventsEventIdSchedulesScheduleIdAttendanceRoute
+  EventsEventIdSchedulesScheduleIdPreviewRoute: typeof EventsEventIdSchedulesScheduleIdPreviewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -147,6 +161,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsEventIdSchedulesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/$eventId/schedules/$scheduleId/preview': {
+      id: '/events/$eventId/schedules/$scheduleId/preview'
+      path: '/events/$eventId/schedules/$scheduleId/preview'
+      fullPath: '/events/$eventId/schedules/$scheduleId/preview'
+      preLoaderRoute: typeof EventsEventIdSchedulesScheduleIdPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/events/$eventId/schedules/$scheduleId/attendance': {
       id: '/events/$eventId/schedules/$scheduleId/attendance'
       path: '/events/$eventId/schedules/$scheduleId/attendance'
@@ -165,6 +186,8 @@ const rootRouteChildren: RootRouteChildren = {
   EventsEventIdSchedulesIndexRoute: EventsEventIdSchedulesIndexRoute,
   EventsEventIdSchedulesScheduleIdAttendanceRoute:
     EventsEventIdSchedulesScheduleIdAttendanceRoute,
+  EventsEventIdSchedulesScheduleIdPreviewRoute:
+    EventsEventIdSchedulesScheduleIdPreviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
