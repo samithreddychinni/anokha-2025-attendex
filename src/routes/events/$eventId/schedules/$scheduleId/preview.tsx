@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { ChevronRight, ArrowLeft, Users, AlertCircle, Eye, Search } from 'lucide-react'
+import { ChevronRight, ArrowLeft, Users, AlertCircle, Search } from 'lucide-react'
 import api from '@/lib/api'
 import Loader from '@/components/Loader'
 
@@ -38,7 +38,28 @@ function PreviewPage() {
       console.log('Preview Data Response:', res.data)
       // Handle various response structures
       const data = res.data.participants || res.data.data || res.data
-      return (Array.isArray(data) ? data : []) as Participant[]
+      const rawList = Array.isArray(data) ? data : []
+
+      // Flatten logic: If items have 'students' array (Team structure), extract them.
+      // Otherwise assume it's a flat list of students.
+      const flattenedStudents: Participant[] = []
+      
+      rawList.forEach((item: any) => {
+          if (item.students && Array.isArray(item.students)) {
+              // It's a team object, extract students
+              item.students.forEach((student: any) => {
+                  flattenedStudents.push({
+                      ...student,
+                      // Preserve parent/team info if needed, e.g. team_name: item.team_name
+                  })
+              })
+          } else {
+              // It's likely a direct student object
+              flattenedStudents.push(item)
+          }
+      })
+
+      return flattenedStudents
     }
   })
 
@@ -70,7 +91,7 @@ function PreviewPage() {
   })
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen pb-24">
 
       <div className="container mx-auto p-4">
         {/* Header */}
@@ -118,7 +139,7 @@ function PreviewPage() {
             </div>
           ) : (
             filteredList.map((p, i) => (
-              <div key={p.student_id || p.id || i} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between opacity-90">
+              <div key={`${p.student_id || p.id || 'unknown'}-${i}`} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between opacity-90">
                 <div>
                   <p className="font-semibold text-foreground">{p.student_name || p.name || 'Unknown Name'}</p>
                   <p className="text-xs text-muted-foreground">

@@ -50,14 +50,82 @@ function ScheduleSelection() {
     }
   }
 
+  // Deduplicate schedules based on event_schedule_id
+  const uniqueSchedules = Array.from(new Map(schedules.map(item => [item.event_schedule_id, item])).values());
+
   // Adapter for ScheduleCard component
-  const getScheduleForCard = (s: ScheduleItem) => ({
-      id: s.event_schedule_id, // Important: API uses event_schedule_id
-      event_date: s.event_date,
-      start_time: s.start_time,
-      end_time: s.end_time,
-      venue: s.venue
-  })
+  const getScheduleForCard = (s: ScheduleItem) => {
+      const now = new Date();
+      
+      const createSafeDate = (dateStr: string, timeStr: string) => {
+          try {
+             // Check if timeStr contains a date
+            const hasDateInTime = timeStr && timeStr.includes('-');
+            
+            let dString = dateStr;
+            let tString = timeStr;
+
+            if (hasDateInTime) {
+                const separator = timeStr.includes('T') ? 'T' : ' ';
+                const parts = timeStr.split(separator);
+                if (parts.length >= 2) {
+                    dString = parts[0];
+                    tString = parts[1];
+                     if (parts.length > 2) tString = parts.slice(1).join(separator);
+                } else {
+                    dString = timeStr;
+                    tString = "00:00:00"; 
+                }
+            } else if (tString && tString.includes('T')) {
+                 tString = tString.split('T')[1];
+            }
+
+            const [year, month, day] = dString.split('T')[0].split('-').map(Number);
+            
+            let hours = 0, minutes = 0, seconds = 0;
+            let cleanTime = tString ? tString.trim() : "";
+            
+            if (cleanTime.toLowerCase().includes('m')) { 
+                 const [timePart, modifier] = cleanTime.split(' ');
+                 let [h, m, sec] = timePart.split(':').map(Number);
+                 if (modifier.toLowerCase() === 'pm' && h < 12) h += 12;
+                 if (modifier.toLowerCase() === 'am' && h === 12) h = 0;
+                 hours = h; minutes = m; seconds = sec || 0;
+            } else if (cleanTime) { 
+                 [hours, minutes, seconds] = cleanTime.split(':').map(Number);
+            }
+
+            return new Date(year, month - 1, day, hours, minutes, seconds || 0);
+          } catch (e) {
+              console.error("Schedule Parse Error", e);
+              return new Date(now.getTime() + 86400000); 
+          }
+      };
+
+      const start = createSafeDate(s.event_date, s.start_time);
+      const end = createSafeDate(s.event_date, s.end_time);
+      
+      // Calculate "Ongoing" window
+      const ongoingStart = new Date(start.getTime() - 30 * 60000);
+
+      let status: 'ongoing' | 'upcoming' | 'completed' = 'upcoming';
+
+      if (now >= ongoingStart && now <= end) {
+          status = 'ongoing';
+      } else if (now > end) {
+          status = 'completed';
+      } else {
+          status = 'upcoming'; 
+      }
+
+      return {
+        id: s.event_schedule_id, 
+        event_date: s.event_date,
+        start_time: s.start_time,
+        end_time: s.end_time,
+        status
+      }
+  }
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader /></div>
 
@@ -73,7 +141,7 @@ function ScheduleSelection() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24 relative p-4">
+    <div className="min-h-screen pb-24 relative p-4">
         {/* Header */}
         <div className="mb-6 pt-2">
            <Link to="/events" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
@@ -88,7 +156,7 @@ function ScheduleSelection() {
 
         {/* List */}
         <div className="space-y-3">
-             {schedules.map(schedule => (
+             {uniqueSchedules.map(schedule => (
               <ScheduleCard
                 key={schedule.event_schedule_id}
                 schedule={getScheduleForCard(schedule)}

@@ -1,9 +1,9 @@
 'use client'
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useState, useRef, useCallback } from 'react'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, X, Zap, AlertTriangle, CheckCircle2 } from 'lucide-react'
-import QrScanner from 'react-qr-scanner'
+import { ArrowLeft } from 'lucide-react'
+import { Scanner } from '@yudiel/react-qr-scanner'
 import { toast } from 'sonner'
 import api from '@/lib/api'
 import Loader from '@/components/Loader'
@@ -35,7 +35,7 @@ export const Route = createFileRoute(
 
 function AttendanceScanner() {
   const { eventId, scheduleId } = Route.useParams()
-  const navigate = useNavigate()
+  // const navigate = useNavigate() // Unused
   const queryClient = useQueryClient()
   
   // State
@@ -55,13 +55,35 @@ function AttendanceScanner() {
     staleTime: 1000 * 60 * 5 // Cache for 5 mins
   })
 
+  // Fetch Event Details to check if it is a GROUP event
+  const { data: eventDetails } = useQuery({
+      queryKey: ['event-details', eventId],
+      queryFn: async () => {
+          // We can re-use the list endpoint or specific event endpoint if available
+          // Since /attendance/list/event returns all, we can filter or if there is a specific one better.
+          // Using the list endpoint and filtering is safest consistent way based on current knowledge
+          const res = await api.get('/attendance/list/event')
+          const data = res.data.events || res.data.data || res.data
+          const list = (Array.isArray(data) ? data : []) as any[]
+          return list.find(e => e.event_id === eventId)
+      },
+      staleTime: 1000 * 60 * 60 // 1 hour
+  })
+
+  const isGroup = eventDetails?.is_group === true || eventDetails?.is_group === 'true' || eventDetails?.is_group === 'GROUP';
+
   // API Mutation
   const markAttendanceMutation = useMutation({
     mutationFn: async ({ studentId, sid }: { studentId: string, sid: string }) => {
-      // POST /attendance/solo/mark/IN/:studentId/:scheduleId
-      return await api.post(`/attendance/solo/mark/IN/${studentId}/${sid}`)
+      // Conditional Endpoint
+      const endpoint = isGroup 
+        ? `/attendance/team/mark/IN/${studentId}/${sid}`
+        : `/attendance/solo/mark/IN/${studentId}/${sid}`;
+      
+      console.log(`Marking attendance via ${isGroup ? 'TEAM' : 'SOLO'} endpoint: ${endpoint}`);
+      return await api.post(endpoint)
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_, variables) => {
       triggerFeedback('success')
       toast.success("Marked Successfully", {
         description: `Student ID: ${variables.studentId.slice(0, 8)}...`
@@ -99,10 +121,11 @@ function AttendanceScanner() {
   }
 
   // Scan Handler
-  const handleScan = useCallback((data: any) => {
-    if (!data || isProcessing) return
+  const handleScan = useCallback((result: any) => {
+    if (!result || isProcessing) return
 
-    const rawText = data?.text
+    // @yudiel/react-qr-scanner returns an array of detected codes
+    const rawText = result?.[0]?.rawValue
     if (!rawText) return
 
     // 1. Debounce same code
@@ -205,13 +228,15 @@ function AttendanceScanner() {
 
       {/* Camera Viewport */}
       <div className="relative flex-1 bg-black overflow-hidden flex items-center justify-center">
-         <QrScanner
-            delay={300}
-            style={previewStyle as any}
+         <Scanner
+            scanDelay={300}
             onError={handleError}
             onScan={handleScan}
             constraints={{
-                video: { facingMode: 'environment' }
+                facingMode: 'environment'
+            }}
+            styles={{
+                video: previewStyle
             }}
           />
           
@@ -232,7 +257,7 @@ function AttendanceScanner() {
           {!participants && isLoadingParticipants && (
               <div className="absolute bottom-32 left-0 right-0 flex justify-center">
                   <div className="bg-black/60 backdrop-blur px-4 py-2 rounded-lg text-white text-sm flex items-center gap-2">
-                      <Loader size="sm" /> Syncing Roster...
+                      <Loader /> Syncing Roster...
                   </div>
               </div>
           )}

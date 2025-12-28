@@ -33,14 +33,24 @@ export function LoginComponent() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="w-full max-w-md bg-card/50 backdrop-blur-xl border border-border rounded-xl p-8 shadow-2xl">
+        <div className="h-[100dvh] w-full flex items-center justify-center p-4 relative overflow-hidden">
+             {/* Mascot Background */}
+            <div
+                className="absolute inset-0 -z-10 pointer-events-none flex items-center justify-center opacity-5 dark:opacity-10 bg-no-repeat bg-center transition-opacity duration-300"
+                style={{
+                    backgroundImage: "url('/mascot-flag.webp')",
+                    backgroundSize: "contain", // contain ensures it doesn't overflow
+                    backgroundPosition: "center",
+                }}
+            />
+            
+            <div className="w-full max-w-sm md:max-w-md bg-card/50 backdrop-blur-xl border border-border rounded-xl p-6 md:p-8 shadow-2xl relative z-10 max-h-full overflow-y-auto">
                 <div className="flex flex-col items-center mb-6">
                     <div className="bg-primary/10 p-3 rounded-full mb-4">
-                        <img src="/logo.png" alt="Anokha Logo" className="h-10 w-auto" />
+                        <img src="/logo.png" alt="Anokha Logo" className="h-8 md:h-10 w-auto" />
                     </div>
-                    <h2 className="text-2xl font-bold text-card-foreground">Organizer Login</h2>
-                    <p className="text-muted-foreground text-center mt-2">Enter your credentials to access the portal.</p>
+                    <h2 className="text-xl md:text-2xl font-bold text-card-foreground">Organizer Login</h2>
+                    <p className="text-muted-foreground text-center mt-2 text-sm md:text-base">Enter your credentials to access the portal.</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">

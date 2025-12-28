@@ -1,4 +1,4 @@
-import { Calendar, Clock, MapPin, ChevronRight, CheckCircle2 } from 'lucide-react'
+import { Calendar, Clock, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { formatDate, formatTime } from '@/lib/utils'
 
 interface ScheduleCardProps {
@@ -7,13 +7,19 @@ interface ScheduleCardProps {
         event_date: string
         start_time: string
         end_time: string
-        venue: string
+        status: 'ongoing' | 'upcoming' | 'completed'
     }
     isSelected: boolean
     onSelect: () => void
 }
 
 export function ScheduleCard({ schedule, isSelected, onSelect }: ScheduleCardProps) {
+    const styles = {
+        ongoing: "bg-green-500/10 text-green-600 border-green-500/20",
+        upcoming: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+        completed: "bg-slate-500/10 text-slate-600 border-slate-500/20"
+    };
+
     return (
         <button
             onClick={onSelect}
@@ -24,7 +30,7 @@ export function ScheduleCard({ schedule, isSelected, onSelect }: ScheduleCardPro
         >
             <div className="flex justify-between items-start gap-4">
                 <div className="space-y-3">
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex flex-wrap items-center gap-2.5">
                         <div
                             className={`p-2 rounded-lg transition-colors ${isSelected ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'
                                 }`}
@@ -34,6 +40,10 @@ export function ScheduleCard({ schedule, isSelected, onSelect }: ScheduleCardPro
                         <span className="font-semibold text-card-foreground text-lg">
                             {formatDate(schedule.event_date)}
                         </span>
+                        
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border ${styles[schedule.status]}`}>
+                            {schedule.status}
+                        </span>
                     </div>
 
                     <div className="space-y-1.5 pl-1">
@@ -42,10 +52,6 @@ export function ScheduleCard({ schedule, isSelected, onSelect }: ScheduleCardPro
                             <span>
                                 {formatTime(schedule.start_time)} - {formatTime(schedule.end_time)}
                             </span>
-                        </div>
-                        <div className="flex items-center gap-2.5 text-muted-foreground text-sm">
-                            <MapPin size={15} />
-                            <span>{schedule.venue}</span>
                         </div>
                     </div>
                 </div>
