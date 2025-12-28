@@ -71,12 +71,6 @@ function PreviewPage() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Read Only Banner */}
-      <div className="bg-muted/80 backdrop-blur border-b text-center py-2 px-4 sticky top-0 z-50 flex items-center justify-center gap-2">
-        <Eye size={16} className="text-muted-foreground" />
-        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Preview Mode — No Changes Allowed</span>
-        <Eye size={16} className="text-muted-foreground" />
-      </div>
 
       <div className="container mx-auto p-4">
         {/* Header */}

@@ -1,38 +1,26 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate, createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { ChevronRight, AlertCircle } from 'lucide-react'
+import { ChevronRight, AlertCircle, ArrowLeft } from 'lucide-react'
 import api from '@/lib/api'
 import Loader from '@/components/Loader'
 import { ScheduleCard } from '@/components/ScheduleCard'
 
-// Define the route
 export const Route = createFileRoute('/events/$eventId/schedules/')({
   component: ScheduleSelection,
 })
 
-// Types (adjust based on actual API response)
-interface Schedule {
-  id: string
+// Shared Interface (should ideally be in a types file)
+interface ScheduleItem {
+  event_id: string
+  event_schedule_id: string
+  event_name: string
   event_date: string
   start_time: string
   end_time: string
   venue: string
-}
-
-import { Calendar } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
-
-// ...
-
-interface EventData {
-  event_id: string
-  event_name: string
-  event_description?: string
-  event_date?: string
   is_group?: boolean | string
   event_type?: string
-  schedules?: Schedule[]
 }
 
 function ScheduleSelection() {
@@ -40,206 +28,77 @@ function ScheduleSelection() {
   const navigate = useNavigate()
   const [selectedScheduleId, setSelectedScheduleId] = useState<string | null>(null)
 
-  const mockEventsResponse = {
-    "events": [
-      {
-        "event_id": "ca12c02c-32ca-4568-8250-f63c516747e0",
-        "event_name": "Chimay Grande Réserve 7",
-        "event_description": "A classic Trappist ale with a light floral rosy flowery fragrance.",
-        "event_date": "2025-12-28T00:00:00Z",
-        "event_type": "Workshop",
-        "is_group": false,
-        "schedules": [
-          {
-            "end_time": "2025-07-21T12:00:00",
-            "event_date": "2025-12-28",
-            "id": "2a545486-1c4b-4531-919d-edfa74ff4e77",
-            "start_time": "2025-07-21T10:00:00",
-            "venue": "New Orleans"
-          }
-        ]
-      },
-      {
-        "event_id": "449ac1f6-b4de-48d7-8287-6b22ec7c8e5b",
-        "event_name": "St. Bernardus Abt 12 9",
-        "event_description": "Dark brown, full-bodied, complex ale.",
-        "event_date": "2025-12-29T10:00:00Z",
-        "event_type": "Competition",
-        "is_group": false,
-        "schedules": [
-          {
-            "end_time": "2025-07-21T12:00:00",
-            "event_date": "2025-12-28",
-            "id": "443a44d8-e1d0-4772-852f-829511bfe09f",
-            "start_time": "2025-07-21T10:00:00",
-            "venue": "Irvine"
-          }
-        ]
-      },
-      {
-        "event_id": "842237b0-0e4e-4de4-9caf-35c738b80054",
-        "event_name": "Tech Workshop",
-        "event_description": "Hands-on session on modern web technologies.",
-        "event_date": "2025-12-28T09:00:00Z",
-        "event_type": "Workshop",
-        "is_group": "SOLO",
-        "schedules": [
-          {
-            "end_time": "2025-07-21T12:00:00",
-            "event_date": "2025-12-28",
-            "id": "37967365-3d43-4fdf-bfa6-ae25fc364e89",
-            "start_time": "2025-07-21T10:00:00",
-            "venue": "Online Zoom Room"
-          }
-        ]
-      },
-      {
-        "event_id": "d6f14e6d-6627-400d-8b97-593877aabf82",
-        "event_name": "Ten FIDY 5",
-        "event_description": "Imperial Stout - immense viscosity and rich chocolate.",
-        "event_date": "2025-01-15T18:00:00Z",
-        "event_type": "Tasting",
-        "is_group": true,
-        "schedules": [
-          {
-            "end_time": "2025-07-21T12:00:00",
-            "event_date": "2025-12-28",
-            "id": "e275a2a7-b100-4c80-b1b2-5471e6afe4cb",
-            "start_time": "2025-07-21T10:00:00",
-            "venue": "Buffalo"
-          }
-        ]
-      },
-      {
-        "event_id": "4418e0a0-7357-4f3a-8c85-4b5e5d948c4f",
-        "event_name": "Two Hearted Ale 3",
-        "event_description": "Those roughly with fortnightly which paint here has significant ever.",
-        "event_date": "2025-12-28T00:00:00Z",
-        "event_type": "WORKSHOP",
-        "is_group": true,
-        "schedules": [
-          {
-            "end_time": "2025-07-21T12:00:00",
-            "event_date": "2025-12-28",
-            "id": "57df9c95-293b-472a-85a7-2b8c5e0f7896",
-            "start_time": "2025-07-21T10:00:00",
-            "venue": "Laredo"
-          }
-        ]
-      }
-    ],
-    "message": "Events fetched successfully"
-  }
+  // Fetch all schedules (cached from previous screen usually)
+  const { data: rawSchedules, isLoading, error } = useQuery({
+    queryKey: ['attendance', 'events-list'],
+    queryFn: async () => {
+      const res = await api.get('/attendance/list/event')
+      console.log("Schedules List Response:", res.data); // DEBUG
+      const data = res.data.events || res.data.data || res.data
+      return (Array.isArray(data) ? data : []) as ScheduleItem[]
+    }
+  })
 
-  // Find the event matching the current eventId
-  const event = (mockEventsResponse.events as unknown as EventData[]).find(e => e.event_id === eventId) || mockEventsResponse.events[0] as unknown as EventData
+  // Filter for this event
+  const schedules = (rawSchedules || []).filter(s => s.event_id === eventId)
+  const eventDetails = schedules[0] // Get event metadata from first schedule
 
-  const isLoading = false
-  const error = null
-
-  // Handlers
-  const handleSelect = (scheduleId: string) => {
-    setSelectedScheduleId(scheduleId)
-  }
-
+  // Handler
   const handlePreview = () => {
     if (selectedScheduleId) {
       navigate({ to: `/events/${eventId}/schedules/${selectedScheduleId}/preview` } as any)
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader />
-      </div>
-    )
-  }
+  // Adapter for ScheduleCard component
+  const getScheduleForCard = (s: ScheduleItem) => ({
+      id: s.event_schedule_id, // Important: API uses event_schedule_id
+      event_date: s.event_date,
+      start_time: s.start_time,
+      end_time: s.end_time,
+      venue: s.venue
+  })
 
-  if (error || !event) {
+  if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader /></div>
+
+  if (error || schedules.length === 0) {
     return (
       <div className="min-h-screen p-4 flex flex-col items-center justify-center text-center">
         <AlertCircle className="text-destructive w-12 h-12 mb-4" />
-        <h3 className="text-xl font-bold mb-2">Error Loading Schedules</h3>
-        <p className="text-muted-foreground mb-6">Could not find the requested event.</p>
-        <Link to="/dashboard" className="px-6 py-2 bg-secondary rounded-xl font-medium">
-          Back to Dashboard
-        </Link>
+        <h3 className="text-xl font-bold mb-2">No Schedules Found</h3>
+        <p className="text-muted-foreground mb-6">Could not find schedules for this event ID.</p>
+        <Link to="/events" className="px-6 py-2 bg-secondary rounded-xl font-medium">Back to Events</Link>
       </div>
     )
   }
 
-  const schedules = event.schedules || []
-
-  // Format is_group display
-  const groupLabel = typeof event.is_group === 'string'
-    ? event.is_group
-    : (event.is_group ? 'GROUP' : 'SOLO');
-
   return (
-    <div className="min-h-screen bg-background pb-24 relative">
-
-      <div className="p-4 pt-6">
-        <div className="mb-6">
-          <Link to="/dashboard" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
-            <ChevronRight className="rotate-180 mr-1" size={16} /> Back to Events
+    <div className="min-h-screen bg-background pb-24 relative p-4">
+        {/* Header */}
+        <div className="mb-6 pt-2">
+           <Link to="/events" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
+            <ArrowLeft size={16} className="mr-1" /> Back to Events
           </Link>
 
-          <div className="space-y-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border ${groupLabel === 'GROUP'
-                  ? "bg-orange-500/10 text-orange-600 border-orange-500/20"
-                  : "bg-purple-500/10 text-purple-600 border-purple-500/20"
-                  }`}>
-                  {groupLabel}
-                </span>
-                {event.event_type && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-blue-500/10 text-blue-600 border border-blue-500/20">
-                    {event.event_type}
-                  </span>
-                )}
-              </div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1">{event.event_name}</h1>
-              {event.event_description && (
-                <p className="text-muted-foreground text-sm line-clamp-2">{event.event_description}</p>
-              )}
-            </div>
-
-            {event.event_date && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-secondary/30 p-3 rounded-xl border border-secondary">
-                <Calendar size={16} />
-                <span className="font-medium">{formatDate(event.event_date)}</span>
-              </div>
-            )}
-          </div>
-
-          <div className="h-px bg-border my-6"></div>
-
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-            Select Schedule
-          </h2>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1">
+            {eventDetails?.event_name || 'Event Schedules'}
+          </h1>
+          <p className="text-muted-foreground text-sm">Select a time slot to manage.</p>
         </div>
 
-        {/* Schedules List */}
-        <div className="space-y-4">
-          {schedules.length === 0 ? (
-            <div className="text-center p-8 border border-dashed rounded-2xl text-muted-foreground">
-              No schedules found for this event.
-            </div>
-          ) : (
-            schedules.map(schedule => (
+        {/* List */}
+        <div className="space-y-3">
+             {schedules.map(schedule => (
               <ScheduleCard
-                key={schedule.id}
-                schedule={schedule}
-                isSelected={selectedScheduleId === schedule.id}
-                onSelect={() => handleSelect(schedule.id)}
+                key={schedule.event_schedule_id}
+                schedule={getScheduleForCard(schedule)}
+                isSelected={selectedScheduleId === schedule.event_schedule_id}
+                onSelect={() => setSelectedScheduleId(schedule.event_schedule_id)}
               />
-            ))
-          )}
+            ))}
         </div>
 
-        {/* Floating "Preview" Button */}
+         {/* Floating "Preview" Button */}
         {selectedScheduleId && (
           <div className="fixed bottom-6 left-4 right-4 z-40 animate-in slide-in-from-bottom-4">
             <button
@@ -249,9 +108,11 @@ function ScheduleSelection() {
               <span>Preview Registrations</span>
               <ChevronRight size={20} />
             </button>
+             <p className="text-center text-[10px] text-muted-foreground mt-2 bg-background/80 backdrop-blur py-1 rounded-full">
+                Proceed to see participants and start scanning
+            </p>
           </div>
         )}
-      </div>
     </div>
   )
 }
