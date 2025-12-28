@@ -140,9 +140,9 @@ function ScheduleSelection() {
     setSelectedScheduleId(scheduleId)
   }
 
-  const handleStartAttendance = () => {
+  const handlePreview = () => {
     if (selectedScheduleId) {
-      navigate({ to: `/events/${eventId}/schedules/${selectedScheduleId}/attendance` } as any)
+      navigate({ to: `/events/${eventId}/schedules/${selectedScheduleId}/preview` } as any)
     }
   }
 
@@ -201,14 +201,14 @@ function ScheduleSelection() {
           )}
         </div>
 
-        {/* Floating "Start Attendance" Button */}
+        {/* Floating "Preview" Button */}
         {selectedScheduleId && (
           <div className="fixed bottom-6 left-4 right-4 z-40 animate-in slide-in-from-bottom-4">
             <button
-              onClick={handleStartAttendance}
+              onClick={handlePreview}
               className="w-full bg-primary text-primary-foreground font-bold p-4 rounded-xl shadow-lg shadow-primary/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
-              <span>Start Attendance</span>
+              <span>Preview Registrations</span>
               <ChevronRight size={20} />
             </button>
           </div>
