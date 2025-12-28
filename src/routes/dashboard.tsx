@@ -70,8 +70,8 @@ function Dashboard() {
             <header className="mb-8 pt-4">
                 <h2 className="text-lg font-medium text-muted-foreground mb-1">
                     Welcome, <span className="text-foreground font-semibold">
-                        {(user?.name || 'Organizer').length > 20 
-                            ? `${(user?.name || 'Organizer').slice(0, 20)}..` 
+                        {(user?.name || 'Organizer').length > 20
+                            ? `${(user?.name || 'Organizer').slice(0, 20)}..`
                             : (user?.name || 'Organizer')}
                     </span>
                 </h2>
@@ -92,7 +92,7 @@ function Dashboard() {
                 {events?.map((event) => (
                     <Link
                         key={event.id}
-                        to={`/events/${event.id}/sessions` as any}
+                        to={`/events/${event.id}/schedules` as any}
                         className="group relative block bg-card backdrop-blur-md border border-border rounded-2xl overflow-hidden active:scale-[0.98] transition-all hover:bg-muted/50 hover:border-ring"
                     >
                         {event.poster_url && (
@@ -112,9 +112,9 @@ function Dashboard() {
                                 {(() => {
                                     const status = event.event_date ? (
                                         new Date(event.event_date).toDateString() === new Date().toDateString() ? 'ongoing' :
-                                        new Date(event.event_date) > new Date() ? 'upcoming' : 'completed'
+                                            new Date(event.event_date) > new Date() ? 'upcoming' : 'completed'
                                     ) : 'upcoming';
-                                    
+
                                     const styles = {
                                         ongoing: "bg-green-500/90 text-white border-green-500/20 shadow-green-500/20",
                                         upcoming: "bg-blue-500/90 text-white border-blue-500/20 shadow-blue-500/20",
@@ -149,7 +149,7 @@ function Dashboard() {
                             </div>
 
                             <div className="mt-6 flex items-center justify-between text-card-foreground font-semibold">
-                                <span>Select Event</span>
+                                <span>View Details</span>
                                 <div className="bg-muted p-2 rounded-full group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                                     <ChevronRight size={20} />
                                 </div>
