@@ -168,6 +168,10 @@ function PreviewPage() {
     const name = (p.student_name || p.name || '').toLowerCase()
     const email = (p.student_email || p.email || '').toLowerCase()
     return name.includes(term) || email.includes(term)
+  }).sort((a, b) => {
+    const nameA = (a.student_name || a.name || '').toLowerCase()
+    const nameB = (b.student_name || b.name || '').toLowerCase()
+    return nameA.localeCompare(nameB)
   })
 
   // Pagination logic

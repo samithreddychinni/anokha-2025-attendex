@@ -138,8 +138,8 @@ function EventsList() {
   const otherEvents = processedEvents.filter(e => e.status !== 'ongoing');
 
   otherEvents.sort((a, b) => {
-    if (a.status === 'completed' && b.status !== 'completed') return -1;
-    if (a.status !== 'completed' && b.status === 'completed') return 1;
+    if (a.status === 'upcoming' && b.status !== 'upcoming') return -1;
+    if (a.status !== 'upcoming' && b.status === 'upcoming') return 1;
     return 0;
   });
 
@@ -247,7 +247,10 @@ function EventsList() {
 
       {otherEvents.length > 0 && (
         <div>
-          <h2 className="text-xl font-semibold mb-4 text-muted-foreground">All Events</h2>
+          <h2 className="text-xl font-semibold mb-4 text-muted-foreground flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-muted-foreground" />
+            All Events
+          </h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {otherEvents.map(event => (
               <EventCard key={event.event_id} event={event} />
