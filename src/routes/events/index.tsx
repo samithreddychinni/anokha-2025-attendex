@@ -17,8 +17,29 @@ function EventsList() {
     queryKey: ['attendance', 'events-list'],
     queryFn: async () => {
       const res = await api.get('/attendance/list/event')
-      const data = res.data.events || res.data.data || res.data
-      return (Array.isArray(data) ? data : []) as ScheduleItem[]
+      const events = res.data.events || res.data.data || res.data
+      const eventList = Array.isArray(events) ? events : []
+      
+      // Flatten the nested structure: each event has a schedules array
+      const flattenedSchedules: ScheduleItem[] = []
+      eventList.forEach((event: any) => {
+        const schedules = event.schedules || []
+        schedules.forEach((schedule: any) => {
+          flattenedSchedules.push({
+            event_id: event.event_id,
+            event_schedule_id: schedule.id,
+            event_name: event.event_name,
+            event_date: schedule.event_date,
+            start_time: schedule.start_time,
+            end_time: schedule.end_time,
+            venue: schedule.venue,
+            is_group: event.is_group,
+            event_type: event.attendance_mode
+          })
+        })
+      })
+      
+      return flattenedSchedules
     }
   })
 
@@ -31,8 +52,6 @@ function EventsList() {
     eventsMap.get(item.event_id)?.schedules.push(item);
   });
 
-  const now = new Date();
-
   const getEventStatus = (schedules: ScheduleItem[]) => {
     let hasOngoing = false;
     let hasUpcoming = false;
@@ -40,42 +59,53 @@ function EventsList() {
 
     const createSafeDate = (dateStr: string, timeStr: string) => {
       try {
-        const hasDateInTime = timeStr && timeStr.includes('-');
-        
-        let dString = dateStr;
-        let tString = timeStr;
-
-        if (hasDateInTime) {
-          const separator = timeStr.includes('T') ? 'T' : ' ';
-          const parts = timeStr.split(separator);
-          if (parts.length >= 2) {
-            dString = parts[0];
-            tString = parts[1];
-            if (parts.length > 2) tString = parts.slice(1).join(separator);
-          } else {
-            dString = timeStr;
-            tString = "00:00:00"; 
+        // First try: if timeStr is a full ISO string, parse it directly
+        if (timeStr && (timeStr.includes('T') || timeStr.includes('-'))) {
+          const parsed = new Date(timeStr);
+          if (!isNaN(parsed.getTime())) {
+            return parsed;
           }
-        } else if (tString && tString.includes('T')) {
-          tString = tString.split('T')[1];
         }
-
-        const [year, month, day] = dString.split('T')[0].split('-').map(Number);
-
+        
+        // Extract date components from dateStr
+        let datePart = dateStr;
+        if (datePart.includes('T')) {
+          datePart = datePart.split('T')[0];
+        }
+        const [year, month, day] = datePart.split('-').map(Number);
+        
+        // Extract time components
+        let cleanTime = timeStr ? timeStr.trim() : "00:00:00";
+        
+        // If time contains 'T', extract just the time part
+        if (cleanTime.includes('T')) {
+          cleanTime = cleanTime.split('T')[1];
+        }
+        
+        // Remove timezone info if present
+        cleanTime = cleanTime.replace(/[Z]$/, '').replace(/[+-]\d{2}:\d{2}$/, '');
+        
         let hours = 0, minutes = 0, seconds = 0;
-        let cleanTime = tString ? tString.trim() : "";
         
         if (cleanTime.toLowerCase().includes('m')) {
-          const [timePart, modifier] = cleanTime.split(' ');
-          let [h, m, s] = timePart.split(':').map(Number);
-          if (modifier.toLowerCase() === 'pm' && h < 12) h += 12;
-          if (modifier.toLowerCase() === 'am' && h === 12) h = 0;
-          hours = h; minutes = m; seconds = s || 0;
+          const match = cleanTime.match(/(\d+):(\d+)(?::(\d+))?\s*(am|pm)/i);
+          if (match) {
+            let h = parseInt(match[1]);
+            const m = parseInt(match[2]);
+            const sec = match[3] ? parseInt(match[3]) : 0;
+            const modifier = match[4].toLowerCase();
+            if (modifier === 'pm' && h < 12) h += 12;
+            if (modifier === 'am' && h === 12) h = 0;
+            hours = h; minutes = m; seconds = sec;
+          }
         } else if (cleanTime) {
-          [hours, minutes, seconds] = cleanTime.split(':').map(Number);
+          const timeParts = cleanTime.split(':').map(Number);
+          hours = timeParts[0] || 0;
+          minutes = timeParts[1] || 0;
+          seconds = timeParts[2] || 0;
         }
 
-        const d = new Date(year, month - 1, day, hours, minutes, seconds || 0);
+        const d = new Date(year, month - 1, day, hours, minutes, seconds);
         if (isNaN(d.getTime())) {
           return new Date(now.getTime() + 86400000); 
         }
@@ -89,11 +119,12 @@ function EventsList() {
       const start = createSafeDate(s.event_date, s.start_time);
       const end = createSafeDate(s.event_date, s.end_time);
       
+      // Allow scanning 30 minutes before start
       const ongoingStart = new Date(start.getTime() - 30 * 60000);
 
       if (now >= ongoingStart && now <= end) {
         hasOngoing = true;
-      } else if (now <= start) {
+      } else if (now < start) {
         hasUpcoming = true;
       }
     }
@@ -223,7 +254,7 @@ function EventsList() {
       {otherEvents.length > 0 && (
         <div>
           <h2 className="text-xl font-semibold mb-4 text-muted-foreground">All Events</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 opacity-80 hover:opacity-100 transition-opacity">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {otherEvents.map(event => (
               <EventCard key={event.event_id} event={event} />
             ))}

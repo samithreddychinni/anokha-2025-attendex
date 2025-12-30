@@ -2,7 +2,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, CheckCircle2, XCircle } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, XCircle, LogIn, LogOut } from 'lucide-react'
 import { Scanner } from '@yudiel/react-qr-scanner'
 import { toast } from 'sonner'
 import api from '@/lib/api'
@@ -22,6 +22,7 @@ function AttendanceScanner() {
   const [lastScanned, setLastScanned] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [scanResult, setScanResult] = useState<'success' | 'error' | null>(null)
+  const [scanMode, setScanMode] = useState<'IN' | 'OUT'>('IN') // For DUO mode
   const scanTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const resultTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -60,6 +61,7 @@ function AttendanceScanner() {
   })
 
   const isGroup = eventDetails?.is_group === true || eventDetails?.is_group === 'true' || eventDetails?.is_group === 'GROUP'
+  const attendanceMode = eventDetails?.attendance_mode?.toUpperCase() || 'SOLO' // SOLO or DUO
 
   const showResultFeedback = (type: 'success' | 'error') => {
     if (navigator.vibrate) {
@@ -76,9 +78,13 @@ function AttendanceScanner() {
 
   const markAttendanceMutation = useMutation({
     mutationFn: async ({ studentId, sid }: { studentId: string, sid: string }) => {
+      // Determine the action based on attendance_mode
+      // SOLO mode uses BOTH, DUO mode uses IN or OUT based on selection
+      const action = attendanceMode === 'DUO' ? scanMode : 'BOTH'
+      
       const endpoint = isGroup 
-        ? `/attendance/team/mark/IN/${studentId}/${sid}`
-        : `/attendance/solo/mark/IN/${studentId}/${sid}`
+        ? `/attendance/team/mark/${action}/${studentId}/${sid}`
+        : `/attendance/solo/mark/${action}/${studentId}/${sid}`
       
       return await api.post(endpoint)
     },
@@ -112,7 +118,8 @@ function AttendanceScanner() {
   })
 
   const handleScan = useCallback((result: any) => {
-    if (!result || isProcessing) return
+    // Don't process new scans while processing, or while result overlay is showing
+    if (!result || isProcessing || scanResult) return
 
     const rawText = result?.[0]?.rawValue
     if (!rawText) return
@@ -132,9 +139,9 @@ function AttendanceScanner() {
         return
       }
 
-      const { studentId, scheduleId: scannedScheduleId } = parsed
+      const { studentId, eventId: scannedEventId } = parsed
 
-      if (!studentId || !scannedScheduleId) {
+      if (!studentId || !scannedEventId) {
         setIsProcessing(false)
         showResultFeedback('error')
         toast.error("Don't Allow", { 
@@ -144,22 +151,62 @@ function AttendanceScanner() {
         return
       }
       
-      if (scannedScheduleId !== scheduleId) {
+      // Check if the scanned eventId matches the current event
+      if (scannedEventId !== eventId) {
         setIsProcessing(false)
         showResultFeedback('error')
-        toast.error("Don't Allow", { 
-          description: "This ticket is for a different schedule",
+        toast.error("Not Registered", { 
+          description: "This ticket is for a different event",
           position: "bottom-center"
         })
         return
       }
 
+      // Check if current time is within schedule window (±30 minutes)
+      const currentSchedule = eventDetails?.schedules?.find((s: any) => s.id === scheduleId)
+      if (currentSchedule) {
+        const now = new Date()
+        const startTime = new Date(currentSchedule.start_time)
+        const endTime = new Date(currentSchedule.end_time)
+        
+        // Allow entry 30 minutes before start and until end time
+        const windowStart = new Date(startTime.getTime() - 30 * 60000)
+        const windowEnd = endTime
+        
+        if (now < windowStart) {
+          setIsProcessing(false)
+          showResultFeedback('error')
+          toast.error("Too Early", { 
+            description: "Attendance window hasn't started yet. Come back closer to the event time.",
+            position: "bottom-center"
+          })
+          return
+        }
+        
+        if (now > windowEnd) {
+          setIsProcessing(false)
+          showResultFeedback('error')
+          toast.error("Too Late", { 
+            description: "Attendance window has ended for this schedule.",
+            position: "bottom-center"
+          })
+          return
+        }
+      }
+
+      // Verify the student is registered for this event
       const isRegistered = participants ? participants.some(p => 
         (p.student_id === studentId) || (p.id === studentId)
       ) : false
 
       if (!isRegistered) {
-        console.log(`Student ${studentId} not found in local roster, proceeding with API call`)
+        setIsProcessing(false)
+        showResultFeedback('error')
+        toast.error("Not Registered", { 
+          description: "This student is not registered for this event.",
+          position: "bottom-center"
+        })
+        return
       }
 
       setLastScanned(rawText)
@@ -172,7 +219,7 @@ function AttendanceScanner() {
     } catch (err: any) {
       setIsProcessing(false)
     }
-  }, [isProcessing, lastScanned, scheduleId, participants, markAttendanceMutation])
+  }, [isProcessing, scanResult, lastScanned, eventId, scheduleId, eventDetails, participants, markAttendanceMutation])
 
   const handleError = (err: any) => {
     console.error("Camera Error:", err)
@@ -226,16 +273,7 @@ function AttendanceScanner() {
           }}
         />
         
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="relative w-64 h-64 border-2 border-white/80 rounded-3xl">
-            <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-primary -mt-1 -ml-1 rounded-tl-xl"/>
-            <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-primary -mt-1 -mr-1 rounded-tr-xl"/>
-            <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-primary -mb-1 -ml-1 rounded-bl-xl"/>
-            <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-primary -mb-1 -mr-1 rounded-br-xl"/>
-            
-            <div className="absolute top-0 left-0 right-0 h-1 bg-primary/50 shadow-[0_0_15px_rgba(var(--primary),1)] animate-[scan_2s_ease-in-out_infinite]" />
-          </div>
-        </div>
+
 
         {!participants && isLoadingParticipants && (
           <div className="absolute bottom-32 left-0 right-0 flex justify-center">
@@ -247,11 +285,48 @@ function AttendanceScanner() {
       </div>
 
       <div className="bg-background pb-8 pt-6 px-6 rounded-t-3xl -mt-6 relative z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-xl font-bold text-center">Scan Participant Ticket</h2>
-          <p className="text-center text-muted-foreground text-sm">
-            Align the QR code within the frame. <br/>
-            Verification happens automatically.
+        <div className="flex flex-col gap-4">
+          <div>
+            <h2 className="text-xl font-bold text-center">Scan Participant Ticket</h2>
+            <p className="text-center text-muted-foreground text-sm">
+              Align the QR code within the frame.
+            </p>
+          </div>
+          
+          {/* Tab bar for DUO mode */}
+          {attendanceMode === 'DUO' && (
+            <div className="flex gap-2 p-1 bg-muted rounded-xl">
+              <button
+                onClick={() => setScanMode('IN')}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-semibold transition-all ${
+                  scanMode === 'IN'
+                    ? 'bg-green-500 text-white shadow-lg shadow-green-500/25'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <LogIn size={18} />
+                Check In
+              </button>
+              <button
+                onClick={() => setScanMode('OUT')}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-semibold transition-all ${
+                  scanMode === 'OUT'
+                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/25'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <LogOut size={18} />
+                Check Out
+              </button>
+            </div>
+          )}
+          
+          {/* Mode indicator */}
+          <p className="text-center text-xs text-muted-foreground">
+            {attendanceMode === 'SOLO' 
+              ? 'Single scan mode (Check In + Out)' 
+              : `Currently: ${scanMode === 'IN' ? 'Checking IN' : 'Checking OUT'}`
+            }
           </p>
         </div>
       </div>

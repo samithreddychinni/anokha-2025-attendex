@@ -19,8 +19,8 @@ export function ScheduleCard({ schedule, isSelected, onSelect }: Props) {
     <button
       onClick={onSelect}
       className={`w-full group relative block border rounded-2xl p-5 transition-all text-left outline-none focus-visible:ring-2 focus-visible:ring-primary ${isSelected
-        ? 'bg-primary/5 border-primary shadow-sm'
-        : 'bg-card backdrop-blur-md border-border hover:bg-muted/50 hover:border-ring active:scale-[0.98]'
+        ? 'bg-card border-primary shadow-sm'
+        : 'bg-card border-border hover:bg-muted/50 hover:border-ring active:scale-[0.98]'
       }`}
     >
       <div className="flex justify-between items-start gap-4">

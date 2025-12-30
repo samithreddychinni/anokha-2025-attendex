@@ -56,5 +56,5 @@ export interface ScheduleCardProps {
 
 export interface ScanData {
   studentId: string
-  scheduleId: string
+  eventId: string  // QR code contains eventId, not scheduleId
 }

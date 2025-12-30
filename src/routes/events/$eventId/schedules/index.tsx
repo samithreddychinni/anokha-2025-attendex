@@ -20,8 +20,29 @@ function ScheduleSelection() {
     queryKey: ['attendance', 'events-list'],
     queryFn: async () => {
       const res = await api.get('/attendance/list/event')
-      const data = res.data.events || res.data.data || res.data
-      return (Array.isArray(data) ? data : []) as ScheduleItem[]
+      const events = res.data.events || res.data.data || res.data
+      const eventList = Array.isArray(events) ? events : []
+      
+      // Flatten the nested structure: each event has a schedules array
+      const flattenedSchedules: ScheduleItem[] = []
+      eventList.forEach((event: any) => {
+        const schedules = event.schedules || []
+        schedules.forEach((schedule: any) => {
+          flattenedSchedules.push({
+            event_id: event.event_id,
+            event_schedule_id: schedule.id, // API uses 'id', we need 'event_schedule_id'
+            event_name: event.event_name,
+            event_date: schedule.event_date,
+            start_time: schedule.start_time,
+            end_time: schedule.end_time,
+            venue: schedule.venue,
+            is_group: event.is_group,
+            event_type: event.attendance_mode
+          })
+        })
+      })
+      
+      return flattenedSchedules
     }
   })
 
@@ -41,43 +62,60 @@ function ScheduleSelection() {
     
     const createSafeDate = (dateStr: string, timeStr: string) => {
       try {
-        const hasDateInTime = timeStr && timeStr.includes('-');
-        
-        let dString = dateStr;
-        let tString = timeStr;
-
-        if (hasDateInTime) {
-          const separator = timeStr.includes('T') ? 'T' : ' ';
-          const parts = timeStr.split(separator);
-          if (parts.length >= 2) {
-            dString = parts[0];
-            tString = parts[1];
-            if (parts.length > 2) tString = parts.slice(1).join(separator);
-          } else {
-            dString = timeStr;
-            tString = "00:00:00"; 
+        // First try: if timeStr is a full ISO string, parse it directly
+        if (timeStr && (timeStr.includes('T') || timeStr.includes('-'))) {
+          const parsed = new Date(timeStr);
+          if (!isNaN(parsed.getTime())) {
+            console.log(`[DEBUG] Parsed full datetime: ${timeStr} -> ${parsed}`);
+            return parsed;
           }
-        } else if (tString && tString.includes('T')) {
-          tString = tString.split('T')[1];
         }
-
-        const [year, month, day] = dString.split('T')[0].split('-').map(Number);
+        
+        // Extract date components from dateStr
+        let datePart = dateStr;
+        if (datePart.includes('T')) {
+          datePart = datePart.split('T')[0];
+        }
+        const [year, month, day] = datePart.split('-').map(Number);
+        
+        // Extract time components
+        let cleanTime = timeStr ? timeStr.trim() : "00:00:00";
+        
+        // If time contains 'T', extract just the time part
+        if (cleanTime.includes('T')) {
+          cleanTime = cleanTime.split('T')[1];
+        }
+        
+        // Remove timezone info if present (e.g., +05:30 or Z)
+        cleanTime = cleanTime.replace(/[Z]$/, '').replace(/[+-]\d{2}:\d{2}$/, '');
         
         let hours = 0, minutes = 0, seconds = 0;
-        let cleanTime = tString ? tString.trim() : "";
         
         if (cleanTime.toLowerCase().includes('m')) { 
-          const [timePart, modifier] = cleanTime.split(' ');
-          let [h, m, sec] = timePart.split(':').map(Number);
-          if (modifier.toLowerCase() === 'pm' && h < 12) h += 12;
-          if (modifier.toLowerCase() === 'am' && h === 12) h = 0;
-          hours = h; minutes = m; seconds = sec || 0;
+          // Handle AM/PM format
+          const match = cleanTime.match(/(\d+):(\d+)(?::(\d+))?\s*(am|pm)/i);
+          if (match) {
+            let h = parseInt(match[1]);
+            const m = parseInt(match[2]);
+            const sec = match[3] ? parseInt(match[3]) : 0;
+            const modifier = match[4].toLowerCase();
+            if (modifier === 'pm' && h < 12) h += 12;
+            if (modifier === 'am' && h === 12) h = 0;
+            hours = h; minutes = m; seconds = sec;
+          }
         } else if (cleanTime) { 
-          [hours, minutes, seconds] = cleanTime.split(':').map(Number);
+          // Handle 24-hour format (HH:MM:SS or HH:MM)
+          const timeParts = cleanTime.split(':').map(Number);
+          hours = timeParts[0] || 0;
+          minutes = timeParts[1] || 0;
+          seconds = timeParts[2] || 0;
         }
 
-        return new Date(year, month - 1, day, hours, minutes, seconds || 0);
-      } catch {
+        const result = new Date(year, month - 1, day, hours, minutes, seconds);
+        console.log(`[DEBUG] Created date from parts: date=${datePart}, time=${timeStr} -> ${result}`);
+        return result;
+      } catch (e) {
+        console.error(`[DEBUG] Failed to parse date: ${dateStr}, ${timeStr}`, e);
         return new Date(now.getTime() + 86400000); 
       }
     };
@@ -85,7 +123,10 @@ function ScheduleSelection() {
     const start = createSafeDate(s.event_date, s.start_time);
     const end = createSafeDate(s.event_date, s.end_time);
     
+    // Start scanning 30 minutes before
     const ongoingStart = new Date(start.getTime() - 30 * 60000);
+
+    console.log(`[DEBUG] Schedule ${s.event_schedule_id}: now=${now.toISOString()}, ongoingStart=${ongoingStart.toISOString()}, start=${start.toISOString()}, end=${end.toISOString()}`);
 
     let status: 'ongoing' | 'upcoming' | 'completed' = 'upcoming';
 
@@ -94,6 +135,8 @@ function ScheduleSelection() {
     } else if (now > end) {
       status = 'completed';
     }
+    
+    console.log(`[DEBUG] Schedule ${s.event_schedule_id} status: ${status}`);
 
     return {
       id: s.event_schedule_id, 

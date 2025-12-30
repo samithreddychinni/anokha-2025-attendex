@@ -18,7 +18,9 @@ function PreviewPage() {
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
   const menuRef = useRef<HTMLDivElement>(null)
+  const ITEMS_PER_PAGE = 20
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -161,6 +163,19 @@ function PreviewPage() {
     return name.includes(term) || email.includes(term)
   })
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredList.length / ITEMS_PER_PAGE)
+  const paginatedList = filteredList.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  )
+
+  // Reset to page 1 when search changes
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value)
+    setCurrentPage(1)
+  }
+
   return (
     <div className="min-h-screen pb-24">
       <div className="container mx-auto p-4">
@@ -182,7 +197,7 @@ function PreviewPage() {
               placeholder="Search by name or email..."
               className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
             />
           </div>
         </div>
@@ -205,58 +220,83 @@ function PreviewPage() {
               )}
             </div>
           ) : (
-            filteredList.map((p, i) => {
-              const studentId = p.student_id || p.id || ''
-              const uniqueKey = `${studentId}-${i}`
-              const isCheckedIn = p.status === 'present' || !!p.check_in
-              
-              return (
-                <div key={uniqueKey} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-foreground truncate">{p.student_name || p.name || 'Unknown Name'}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {p.student_email || p.email || 'No Email Provided'}
-                    </p>
-                    {isCheckedIn && (
-                      <span className="inline-flex items-center gap-1 mt-1 text-xs text-green-600">
-                        <UserCheck size={12} /> Checked In
-                      </span>
-                    )}
-                  </div>
-                  
-                  <div className="relative" ref={openMenuId === uniqueKey ? menuRef : null}>
-                    <button
-                      onClick={() => setOpenMenuId(openMenuId === uniqueKey ? null : uniqueKey)}
-                      className="p-2 hover:bg-muted rounded-lg transition-colors"
-                      disabled={markMutation.isPending || unmarkMutation.isPending}
-                    >
-                      <MoreVertical size={18} className="text-muted-foreground" />
-                    </button>
+            <>
+              {paginatedList.map((p, i) => {
+                const studentId = p.student_id || p.id || ''
+                const uniqueKey = `${studentId}-${i}`
+                const isCheckedIn = p.status === 'present' || !!p.check_in
+                
+                return (
+                  <div key={uniqueKey} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground truncate">{p.student_name || p.name || 'Unknown Name'}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {p.student_email || p.email || 'No Email Provided'}
+                      </p>
+                      {isCheckedIn && (
+                        <span className="inline-flex items-center gap-1 mt-1 text-xs text-green-600">
+                          <UserCheck size={12} /> Checked In
+                        </span>
+                      )}
+                    </div>
                     
-                    {openMenuId === uniqueKey && (
-                      <div className="absolute right-0 top-full mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 min-w-[140px] py-1 animate-in fade-in slide-in-from-top-2 duration-200">
-                        <button
-                          onClick={() => handleMark(studentId)}
-                          disabled={markMutation.isPending}
-                          className="w-full px-4 py-2 text-left text-sm hover:bg-muted flex items-center gap-2 transition-colors"
-                        >
-                          <UserCheck size={16} className="text-green-600" />
-                          Mark
-                        </button>
-                        <button
-                          onClick={() => handleUnmark(studentId)}
-                          disabled={unmarkMutation.isPending}
-                          className="w-full px-4 py-2 text-left text-sm hover:bg-muted flex items-center gap-2 transition-colors"
-                        >
-                          <UserX size={16} className="text-red-600" />
-                          Unmark
-                        </button>
-                      </div>
-                    )}
+                    <div className="relative" ref={openMenuId === uniqueKey ? menuRef : null}>
+                      <button
+                        onClick={() => setOpenMenuId(openMenuId === uniqueKey ? null : uniqueKey)}
+                        className="p-2 hover:bg-muted rounded-lg transition-colors"
+                        disabled={markMutation.isPending || unmarkMutation.isPending}
+                      >
+                        <MoreVertical size={18} className="text-muted-foreground" />
+                      </button>
+                      
+                      {openMenuId === uniqueKey && (
+                        <div className="absolute right-0 top-full mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 min-w-[140px] py-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                          <button
+                            onClick={() => handleMark(studentId)}
+                            disabled={markMutation.isPending}
+                            className="w-full px-4 py-2 text-left text-sm hover:bg-muted flex items-center gap-2 transition-colors"
+                          >
+                            <UserCheck size={16} className="text-green-600" />
+                            Mark
+                          </button>
+                          <button
+                            onClick={() => handleUnmark(studentId)}
+                            disabled={unmarkMutation.isPending}
+                            className="w-full px-4 py-2 text-left text-sm hover:bg-muted flex items-center gap-2 transition-colors"
+                          >
+                            <UserX size={16} className="text-red-600" />
+                            Unmark
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                )
+              })}
+              
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-4 pb-2">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 rounded-lg bg-secondary text-secondary-foreground font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary/80 transition-colors"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-muted-foreground px-3">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 rounded-lg bg-secondary text-secondary-foreground font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary/80 transition-colors"
+                  >
+                    Next
+                  </button>
                 </div>
-              )
-            })
+              )}
+            </>
           )}
         </div>
       </div>
