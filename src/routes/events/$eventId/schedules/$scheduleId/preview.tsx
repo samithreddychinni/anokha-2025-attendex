@@ -54,15 +54,20 @@ function PreviewPage() {
     }
   })
 
+  // Use the cached events list - this was already fetched on the events page with Infinity staleTime
   const { data: eventDetails } = useQuery({
-    queryKey: ['event-details', eventId],
+    queryKey: ['attendance', 'events-list'],
     queryFn: async () => {
       const res = await api.get('/attendance/list/event')
-      const data = res.data.events || res.data.data || res.data
+      return res.data.events || res.data.data || res.data
+    },
+    staleTime: Infinity,
+    gcTime: Infinity,
+    select: (data) => {
+      // Find the matching event from the cached list
       const list = (Array.isArray(data) ? data : []) as any[]
       return list.find(e => e.event_id === eventId)
-    },
-    staleTime: 1000 * 60 * 60
+    }
   })
 
   const isGroup = eventDetails?.is_group === true || eventDetails?.is_group === 'true' || eventDetails?.is_group === 'GROUP'
@@ -72,7 +77,8 @@ function PreviewPage() {
       const endpoint = isGroup 
         ? `/attendance/team/mark/IN/${studentId}/${scheduleId}`
         : `/attendance/solo/mark/IN/${studentId}/${scheduleId}`
-      return await api.post(endpoint)
+      const res = await api.post(endpoint)
+      return res
     },
     onSuccess: () => {
       toast.success('Attendance Marked', {
@@ -102,7 +108,8 @@ function PreviewPage() {
       const endpoint = isGroup 
         ? `/attendance/team/unMark/IN/${studentId}/${scheduleId}`
         : `/attendance/solo/unMark/IN/${studentId}/${scheduleId}`
-      return await api.delete(endpoint)
+      const res = await api.delete(endpoint)
+      return res
     },
     onSuccess: () => {
       toast.success('Attendance Unmarked', {

@@ -22,7 +22,7 @@ function AttendanceScanner() {
   const [lastScanned, setLastScanned] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [scanResult, setScanResult] = useState<'success' | 'error' | null>(null)
-  const [scanMode, setScanMode] = useState<'IN' | 'OUT'>('IN') // For DUO mode
+  const [scanMode, setScanMode] = useState<'IN' | 'OUT'>('IN')
   const scanTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const resultTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -50,18 +50,21 @@ function AttendanceScanner() {
   })
 
   const { data: eventDetails } = useQuery({
-    queryKey: ['event-details', eventId],
+    queryKey: ['attendance', 'events-list'],
     queryFn: async () => {
       const res = await api.get('/attendance/list/event')
-      const data = res.data.events || res.data.data || res.data
+      return res.data.events || res.data.data || res.data
+    },
+    staleTime: Infinity,
+    gcTime: Infinity,
+    select: (data) => {
       const list = (Array.isArray(data) ? data : []) as any[]
       return list.find(e => e.event_id === eventId)
-    },
-    staleTime: 1000 * 60 * 60
+    }
   })
 
   const isGroup = eventDetails?.is_group === true || eventDetails?.is_group === 'true' || eventDetails?.is_group === 'GROUP'
-  const attendanceMode = eventDetails?.attendance_mode?.toUpperCase() || 'SOLO' // SOLO or DUO
+  const attendanceMode = eventDetails?.attendance_mode?.toUpperCase() || 'SOLO'
 
   const showResultFeedback = (type: 'success' | 'error') => {
     if (navigator.vibrate) {
@@ -78,15 +81,14 @@ function AttendanceScanner() {
 
   const markAttendanceMutation = useMutation({
     mutationFn: async ({ studentId, sid }: { studentId: string, sid: string }) => {
-      // Determine the action based on attendance_mode
-      // SOLO mode uses BOTH, DUO mode uses IN or OUT based on selection
       const action = attendanceMode === 'DUO' ? scanMode : 'BOTH'
       
       const endpoint = isGroup 
         ? `/attendance/team/mark/${action}/${studentId}/${sid}`
         : `/attendance/solo/mark/${action}/${studentId}/${sid}`
       
-      return await api.post(endpoint)
+      const res = await api.post(endpoint)
+      return res
     },
     onSuccess: () => {
       showResultFeedback('success')
@@ -124,9 +126,7 @@ function AttendanceScanner() {
     const rawText = result?.[0]?.rawValue
     if (!rawText) return
 
-    if (rawText === lastScanned) {
-      return
-    }
+    if (rawText === lastScanned) return
 
     try {
       setIsProcessing(true)
@@ -139,7 +139,7 @@ function AttendanceScanner() {
         return
       }
 
-      const { studentId, eventId: scannedEventId } = parsed
+      const { student_id: studentId, event_id: scannedEventId } = parsed
 
       if (!studentId || !scannedEventId) {
         setIsProcessing(false)
@@ -216,7 +216,7 @@ function AttendanceScanner() {
 
       markAttendanceMutation.mutate({ studentId, sid: scheduleId })
 
-    } catch (err: any) {
+    } catch {
       setIsProcessing(false)
     }
   }, [isProcessing, scanResult, lastScanned, eventId, scheduleId, eventDetails, participants, markAttendanceMutation])

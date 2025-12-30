@@ -19,8 +19,6 @@ function EventsList() {
       const res = await api.get('/attendance/list/event')
       const events = res.data.events || res.data.data || res.data
       const eventList = Array.isArray(events) ? events : []
-      
-      // Flatten the nested structure: each event has a schedules array
       const flattenedSchedules: ScheduleItem[] = []
       eventList.forEach((event: any) => {
         const schedules = event.schedules || []
@@ -40,7 +38,9 @@ function EventsList() {
       })
       
       return flattenedSchedules
-    }
+    },
+    staleTime: Infinity,
+    gcTime: Infinity
   })
 
   const eventsMap = new Map<string, { info: ScheduleItem, schedules: ScheduleItem[] }>();
@@ -59,7 +59,6 @@ function EventsList() {
 
     const createSafeDate = (dateStr: string, timeStr: string) => {
       try {
-        // First try: if timeStr is a full ISO string, parse it directly
         if (timeStr && (timeStr.includes('T') || timeStr.includes('-'))) {
           const parsed = new Date(timeStr);
           if (!isNaN(parsed.getTime())) {
@@ -67,22 +66,18 @@ function EventsList() {
           }
         }
         
-        // Extract date components from dateStr
         let datePart = dateStr;
         if (datePart.includes('T')) {
           datePart = datePart.split('T')[0];
         }
         const [year, month, day] = datePart.split('-').map(Number);
         
-        // Extract time components
         let cleanTime = timeStr ? timeStr.trim() : "00:00:00";
         
-        // If time contains 'T', extract just the time part
         if (cleanTime.includes('T')) {
           cleanTime = cleanTime.split('T')[1];
         }
         
-        // Remove timezone info if present
         cleanTime = cleanTime.replace(/[Z]$/, '').replace(/[+-]\d{2}:\d{2}$/, '');
         
         let hours = 0, minutes = 0, seconds = 0;
@@ -119,7 +114,6 @@ function EventsList() {
       const start = createSafeDate(s.event_date, s.start_time);
       const end = createSafeDate(s.event_date, s.end_time);
       
-      // Allow scanning 30 minutes before start
       const ongoingStart = new Date(start.getTime() - 30 * 60000);
 
       if (now >= ongoingStart && now <= end) {

@@ -43,7 +43,9 @@ function ScheduleSelection() {
       })
       
       return flattenedSchedules
-    }
+    },
+    staleTime: Infinity,  // Never mark as stale - only refetch on hard refresh
+    gcTime: Infinity      // Never garbage collect the cache
   })
 
   const schedules = (rawSchedules || []).filter(s => s.event_id === eventId)
@@ -66,7 +68,6 @@ function ScheduleSelection() {
         if (timeStr && (timeStr.includes('T') || timeStr.includes('-'))) {
           const parsed = new Date(timeStr);
           if (!isNaN(parsed.getTime())) {
-            console.log(`[DEBUG] Parsed full datetime: ${timeStr} -> ${parsed}`);
             return parsed;
           }
         }
@@ -112,7 +113,6 @@ function ScheduleSelection() {
         }
 
         const result = new Date(year, month - 1, day, hours, minutes, seconds);
-        console.log(`[DEBUG] Created date from parts: date=${datePart}, time=${timeStr} -> ${result}`);
         return result;
       } catch (e) {
         console.error(`[DEBUG] Failed to parse date: ${dateStr}, ${timeStr}`, e);
@@ -126,8 +126,6 @@ function ScheduleSelection() {
     // Start scanning 30 minutes before
     const ongoingStart = new Date(start.getTime() - 30 * 60000);
 
-    console.log(`[DEBUG] Schedule ${s.event_schedule_id}: now=${now.toISOString()}, ongoingStart=${ongoingStart.toISOString()}, start=${start.toISOString()}, end=${end.toISOString()}`);
-
     let status: 'ongoing' | 'upcoming' | 'completed' = 'upcoming';
 
     if (now >= ongoingStart && now <= end) {
@@ -135,8 +133,6 @@ function ScheduleSelection() {
     } else if (now > end) {
       status = 'completed';
     }
-    
-    console.log(`[DEBUG] Schedule ${s.event_schedule_id} status: ${status}`);
 
     return {
       id: s.event_schedule_id, 
