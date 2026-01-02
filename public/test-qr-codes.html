@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test QR Codes - Hospitality System</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #fafafa;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 1.5rem;
+    }
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 30px;
+      font-size: 0.875rem;
+    }
+    .section {
+      margin-bottom: 40px;
+    }
+    .section-title {
+      font-size: 1.25rem;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #333;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: #1a1a2e;
+    }
+    .badge.profile { background: #0d9488; }
+    .badge.hosp { background: #7c3aed; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .qr-card {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid #333;
+    }
+    .qr-card img {
+      border-radius: 8px;
+      margin-bottom: 12px;
+      background: white;
+      padding: 8px;
+    }
+    .qr-label {
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-bottom: 4px;
+    }
+    .qr-data {
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: #888;
+      word-break: break-all;
+      background: #0a0a0a;
+      padding: 6px 8px;
+      border-radius: 4px;
+      margin-top: 8px;
+    }
+    .student-type {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+    .external { background: #dc2626; color: white; }
+    .amrita { background: #2563eb; color: white; }
+    .instructions {
+      background: #1a1a2e;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    .instructions h3 {
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+    .instructions ol {
+      padding-left: 20px;
+      font-size: 0.875rem;
+      color: #ccc;
+    }
+    .instructions li {
+      margin-bottom: 6px;
+    }
+    .instructions code {
+      background: #0a0a0a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test QR Codes</h1>
+  <p class="subtitle">Hospitality Check-in System - Development Testing</p>
+
+  <div class="instructions">
+    <h3>How to Test</h3>
+    <ol>
+      <li>Go to <code>http://localhost:3000/hospitality</code></li>
+      <li>Select <strong>HOSP 1</strong> to start registration</li>
+      <li>First scan a <span class="badge profile">Profile QR</span> (green section below)</li>
+      <li>Then scan a <span class="badge hosp">Hospitality ID</span> (purple section below)</li>
+      <li>Complete the accommodation selection and confirm</li>
+      <li>Test other roles (Finance, HOSP 2, Security) by scanning Hospitality IDs</li>
+    </ol>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">
+      <span class="badge profile">Profile QR Codes</span>
+      Scan these first in HOSP 1
+    </h2>
+    <div class="grid">
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=%7B%22student_id%22%3A%22STU001%22%7D" alt="STU001" width="150" height="150">
+        <div class="qr-label">Rahul Sharma</div>
+        <span class="student-type external">EXTERNAL</span>
+        <div class="qr-data">{"student_id":"STU001"}</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=%7B%22student_id%22%3A%22STU002%22%7D" alt="STU002" width="150" height="150">
+        <div class="qr-label">Priya Krishnan</div>
+        <span class="student-type amrita">AMRITA SISTER</span>
+        <div class="qr-data">{"student_id":"STU002"}</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=%7B%22student_id%22%3A%22STU003%22%7D" alt="STU003" width="150" height="150">
+        <div class="qr-label">Arun Kumar</div>
+        <span class="student-type external">EXTERNAL</span>
+        <div class="qr-data">{"student_id":"STU003"}</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=%7B%22student_id%22%3A%22STU004%22%7D" alt="STU004" width="150" height="150">
+        <div class="qr-label">Deepa Menon</div>
+        <span class="student-type amrita">AMRITA SISTER</span>
+        <div class="qr-data">{"student_id":"STU004"}</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=%7B%22student_id%22%3A%22STU005%22%7D" alt="STU005" width="150" height="150">
+        <div class="qr-label">Vikram Reddy</div>
+        <span class="student-type external">EXTERNAL</span>
+        <div class="qr-data">{"student_id":"STU005"}</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=%7B%22student_id%22%3A%22STU006%22%7D" alt="STU006" width="150" height="150">
+        <div class="qr-label">Ananya Nair</div>
+        <span class="student-type external">EXTERNAL</span>
+        <div class="qr-data">{"student_id":"STU006"}</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=%7B%22student_id%22%3A%22STU007%22%7D" alt="STU007" width="150" height="150">
+        <div class="qr-label">Karthik Iyer</div>
+        <span class="student-type amrita">AMRITA SISTER</span>
+        <div class="qr-data">{"student_id":"STU007"}</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=%7B%22student_id%22%3A%22STU008%22%7D" alt="STU008" width="150" height="150">
+        <div class="qr-label">Sneha Pillai</div>
+        <span class="student-type external">EXTERNAL</span>
+        <div class="qr-data">{"student_id":"STU008"}</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=%7B%22student_id%22%3A%22STU009%22%7D" alt="STU009" width="150" height="150">
+        <div class="qr-label">Arjun Das</div>
+        <span class="student-type external">EXTERNAL</span>
+        <div class="qr-data">{"student_id":"STU009"}</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=%7B%22student_id%22%3A%22STU010%22%7D" alt="STU010" width="150" height="150">
+        <div class="qr-label">Meera Suresh</div>
+        <span class="student-type amrita">AMRITA SISTER</span>
+        <div class="qr-data">{"student_id":"STU010"}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">
+      <span class="badge hosp">Hospitality ID QR Codes</span>
+      Scan these to map/lookup students
+    </h2>
+    <div class="grid">
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=A001" alt="A001" width="150" height="150">
+        <div class="qr-label">A001</div>
+        <div class="qr-data">A001</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=A002" alt="A002" width="150" height="150">
+        <div class="qr-label">A002</div>
+        <div class="qr-data">A002</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=A003" alt="A003" width="150" height="150">
+        <div class="qr-label">A003</div>
+        <div class="qr-data">A003</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=A004" alt="A004" width="150" height="150">
+        <div class="qr-label">A004</div>
+        <div class="qr-data">A004</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=A005" alt="A005" width="150" height="150">
+        <div class="qr-label">A005</div>
+        <div class="qr-data">A005</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=B001" alt="B001" width="150" height="150">
+        <div class="qr-label">B001</div>
+        <div class="qr-data">B001</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=B002" alt="B002" width="150" height="150">
+        <div class="qr-label">B002</div>
+        <div class="qr-data">B002</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=B003" alt="B003" width="150" height="150">
+        <div class="qr-label">B003</div>
+        <div class="qr-data">B003</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=B004" alt="B004" width="150" height="150">
+        <div class="qr-label">B004</div>
+        <div class="qr-data">B004</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=B005" alt="B005" width="150" height="150">
+        <div class="qr-label">B005</div>
+        <div class="qr-data">B005</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=C001" alt="C001" width="150" height="150">
+        <div class="qr-label">C001</div>
+        <div class="qr-data">C001</div>
+      </div>
+      <div class="qr-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=C002" alt="C002" width="150" height="150">
+        <div class="qr-label">C002</div>
+        <div class="qr-data">C002</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
