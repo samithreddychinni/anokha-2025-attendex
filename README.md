@@ -1,310 +1,243 @@
-Welcome to your new TanStack app! 
+# Anokha 2025 Attendex
 
-# Getting Started
+A **mobile-first web application** for **Anokha 2025** - an Organizer Portal used during live events to mark participant attendance via QR scanning or manual override.
 
-To run this application:
+---
+
+## 📋 Overview
+
+This application enables event organizers at the Anokha technical fest to:
+
+- Log in with organizer credentials
+- View assigned events and sessions
+- Mark attendance via QR code scanning or manual entry
+- View real-time attendance status
+- Preview registered participants
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| **Framework** | React 19 |
+| **Build Tool** | Vite 7 |
+| **Package Manager** | Bun |
+| **Routing** | TanStack Router |
+| **Data Fetching** | TanStack Query |
+| **Styling** | Tailwind CSS 4 |
+| **UI Components** | shadcn/ui |
+| **HTTP Client** | Axios |
+| **Linting/Formatting** | Biome |
+| **Testing** | Vitest |
+| **Language** | TypeScript |
+
+---
+
+## 📁 Project Structure
+
+```
+anokha-2025-attendex/
+├── public/                      # Static assets
+│   ├── favicon.ico
+│   ├── logo.png
+│   ├── logo192.png
+│   ├── logo512.png
+│   ├── loading.gif
+│   ├── manifest.json
+│   └── robots.txt
+├── src/
+│   ├── components/              # React components
+│   │   ├── ui/                  # shadcn/ui primitives
+│   │   │   ├── badge.tsx
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── input.tsx
+│   │   │   └── label.tsx
+│   │   ├── AuthGuard.tsx        # Protected route wrapper
+│   │   ├── Header.tsx           # App header with navigation
+│   │   ├── Loader.tsx           # Loading spinner
+│   │   ├── Login.tsx            # Login form component
+│   │   ├── ScheduleCard.tsx     # Event schedule display
+│   │   ├── mode-toggle.tsx      # Dark/light mode toggle
+│   │   └── theme-provider.tsx   # Theme context provider
+│   ├── contexts/
+│   │   └── AuthContext.tsx      # Authentication state management
+│   ├── integrations/
+│   │   └── tanstack-query/      # TanStack Query setup
+│   │       ├── devtools.tsx
+│   │       └── root-provider.tsx
+│   ├── lib/
+│   │   ├── api.ts               # Axios instance configuration
+│   │   └── utils.ts             # Utility functions
+│   ├── routes/                  # TanStack Router file-based routes
+│   │   ├── __root.tsx           # Root layout
+│   │   ├── index.tsx            # Home page (redirects)
+│   │   ├── login.tsx            # Login page
+│   │   ├── dashboard.tsx        # Organizer dashboard
+│   │   ├── demo/                # Demo routes (can be deleted)
+│   │   └── events/
+│   │       ├── index.tsx        # Events listing
+│   │       └── $eventId/
+│   │           └── schedules/
+│   │               ├── index.tsx          # Session selection
+│   │               └── $scheduleId/
+│   │                   ├── attendance.tsx # QR scanner & attendance marking
+│   │                   └── preview.tsx    # Read-only participant view
+│   ├── types/
+│   │   └── index.ts             # TypeScript type definitions
+│   ├── main.tsx                 # App entry point
+│   ├── styles.css               # Global styles
+│   └── routeTree.gen.ts         # Auto-generated route tree
+├── .vscode/                     # VS Code settings
+├── biome.json                   # Biome configuration
+├── components.json              # shadcn/ui configuration
+├── index.html                   # HTML entry point
+├── package.json                 # Dependencies & scripts
+├── tsconfig.json                # TypeScript configuration
+├── vite.config.ts               # Vite configuration
+└── API_DOCUMENTATION.md         # Backend API reference
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- [Bun](https://bun.sh/) (recommended) or Node.js 18+
+- Backend API running on `localhost:8080` (or configure proxy in `vite.config.ts`)
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone <repository-url>
+cd anokha-2025-attendex
+
+# Install dependencies
 bun install
-bun --bun run start
 ```
 
-# Building For Production
-
-To build this application for production:
+### Running the Development Server
 
 ```bash
-bun --bun run build
+bun run dev
 ```
 
-## Testing
+The app will be available at `http://localhost:3000`
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+### Building for Production
 
 ```bash
-bun --bun run test
+bun run build
 ```
 
-## Styling
+Built files will be output to the `dist/` directory.
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-
-## Linting & Formatting
-
-This project uses [Biome](https://biomejs.dev/) for linting and formatting. The following scripts are available:
-
+### Preview Production Build
 
 ```bash
-bun --bun run lint
-bun --bun run format
-bun --bun run check
+bun run preview
 ```
 
+---
 
-## Shadcn
+## 🧪 Testing
 
-Add components using the latest version of [Shadcn](https://ui.shadcn.com/).
+This project is configured with [Vitest](https://vitest.dev/) for testing.
+
+> **Note:** No tests have been written yet. Test files should be created with the pattern `*.test.ts` or `*.spec.ts`.
 
 ```bash
-pnpm dlx shadcn@latest add button
+# Run tests
+bun run test
 ```
 
+---
 
+## 🎨 Adding UI Components
 
-## Routing
-This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.
+This project uses [shadcn/ui](https://ui.shadcn.com/) for UI components:
 
-### Adding A Route
-
-To add a new route to your application just add another a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
+```bash
+bun dlx shadcn@latest add <component-name>
 ```
 
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
+Examples:
+```bash
+bun dlx shadcn@latest add button
+bun dlx shadcn@latest add dialog
+bun dlx shadcn@latest add toast
 ```
 
-This will create a link that will navigate to the `/about` route.
+---
 
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
+## 🔧 Configuration
 
-### Using A Layout
+### API Proxy
 
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component.
+The development server proxies API requests to `http://localhost:8080`. To change this, update `vite.config.ts`:
 
-Here is an example layout that includes a header:
-
-```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-
-import { Link } from "@tanstack/react-router";
-
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      </header>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
-})
-```
-
-The `<TanStackRouterDevtools />` component is not required so you can remove it if you don't want it in your layout.
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-const peopleRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/people",
-  loader: async () => {
-    const response = await fetch("https://swapi.dev/api/people");
-    return response.json() as Promise<{
-      results: {
-        name: string;
-      }[];
-    }>;
+```typescript
+server: {
+  proxy: {
+    '/api': {
+      target: 'http://your-backend-url',
+      changeOrigin: true,
+    },
   },
-  component: () => {
-    const data = peopleRoute.useLoaderData();
-    return (
-      <ul>
-        {data.results.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    );
-  },
-});
+},
 ```
 
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
+### Path Aliases
 
-### React-Query
+The project uses `@/` as an alias for the `src/` directory. This is configured in both `vite.config.ts` and `tsconfig.json`.
 
-React-Query is an excellent addition or alternative to route loading and integrating it into you application is a breeze.
+---
 
-First add your dependencies:
+## 📱 Features
 
-```bash
-bun install @tanstack/react-query @tanstack/react-query-devtools
-```
+### Authentication
+- Session-based organizer login
+- Protected routes via `AuthGuard` component
+- Automatic session verification on app load
 
-Next we'll need to create a query client and provider. We recommend putting those in `main.tsx`.
+### Event Management
+- Dashboard displaying assigned events
+- Multi-session support for events
+- Schedule cards with status indicators (ongoing/upcoming/completed)
 
-```tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+### Attendance Marking
+- **QR Code Scanning**: Primary method using device camera
+- **Manual Override**: Fallback for QR failures
+- Real-time attendance status updates
 
-// ...
+### Preview Mode
+- Read-only view of registered participants
+- View attendance status without modification
 
-const queryClient = new QueryClient();
+---
 
-// ...
+## 🌐 Environment
 
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
+This app expects a backend API running at `/api/v1` with the following endpoints (see `API_DOCUMENTATION.md` for details):
 
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  );
-}
-```
+- `POST /auth/organizer/login` - Organizer login
+- `GET /auth/organizer/session` - Session verification
+- `GET /auth/organizer/logout` - Logout
+- `GET /organizers/dashboard` - Assigned events
+- `GET /organizers/dashboard/:eventId` - Event participants
+- `POST /attendance/mark/event` - Mark attendance (check-in/check-out)
 
-You can also add TanStack Query Devtools to the root route (optional).
+---
 
-```tsx
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+## 📄 License
 
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <ReactQueryDevtools buttonPosition="top-right" />
-      <TanStackRouterDevtools />
-    </>
-  ),
-});
-```
+Private - For Anokha 2025 Use Only
 
-Now you can use `useQuery` to fetch your data.
+---
 
-```tsx
-import { useQuery } from "@tanstack/react-query";
+## 🤝 Contributing
 
-import "./App.css";
-
-function App() {
-  const { data } = useQuery({
-    queryKey: ["people"],
-    queryFn: () =>
-      fetch("https://swapi.dev/api/people")
-        .then((res) => res.json())
-        .then((data) => data.results as { name: string }[]),
-    initialData: [],
-  });
-
-  return (
-    <div>
-      <ul>
-        {data.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default App;
-```
-
-You can find out everything you need to know on how to use React-Query in the [React-Query documentation](https://tanstack.com/query/latest/docs/framework/react/overview).
-
-## State Management
-
-Another common requirement for React applications is state management. There are many options for state management in React. TanStack Store provides a great starting point for your project.
-
-First you need to add TanStack Store as a dependency:
-
-```bash
-bun install @tanstack/store
-```
-
-Now let's create a simple counter in the `src/App.tsx` file as a demonstration.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-function App() {
-  const count = useStore(countStore);
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-    </div>
-  );
-}
-
-export default App;
-```
-
-One of the many nice features of TanStack Store is the ability to derive state from other state. That derived state will update when the base state updates.
-
-Let's check this out by doubling the count using derived state.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store, Derived } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-const doubledStore = new Derived({
-  fn: () => countStore.state * 2,
-  deps: [countStore],
-});
-doubledStore.mount();
-
-function App() {
-  const count = useStore(countStore);
-  const doubledCount = useStore(doubledStore);
-
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-      <div>Doubled - {doubledCount}</div>
-    </div>
-  );
-}
-
-export default App;
-```
-
-We use the `Derived` class to create a new store that is derived from another store. The `Derived` class has a `mount` method that will start the derived store updating.
-
-Once we've created the derived store we can use it in the `App` component just like we would any other store using the `useStore` hook.
-
-You can find out everything you need to know on how to use TanStack Store in the [TanStack Store documentation](https://tanstack.com/store/latest).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+This is an internal project for Anokha 2025. Please contact the development team for contribution guidelines.
