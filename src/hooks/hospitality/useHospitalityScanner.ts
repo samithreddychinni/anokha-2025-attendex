@@ -81,12 +81,17 @@ export function useHospitalityScanner() {
       }
 
       showResultFeedback('success')
-      setState({
-        step: 'HOSP_ID',
-        scannedStudentId: profileQR.student_id,
-        studentProfile: response.data,
-        isProcessing: false,
-      })
+
+      // Delay step transition to show green screen for 1.5 seconds
+      setTimeout(() => {
+        setState((prev) => ({
+          ...prev,
+          step: 'HOSP_ID',
+          scannedStudentId: profileQR.student_id,
+          studentProfile: response.data,
+          isProcessing: false,
+        }))
+      }, 1500)
 
       return true
     },
@@ -127,12 +132,16 @@ export function useHospitalityScanner() {
       }
 
       showResultFeedback('success')
-      setState((prev) => ({
-        ...prev,
-        step: 'ACCOMMODATION',
-        scannedHospId: hospId,
-        isProcessing: false,
-      }))
+
+      // Delay step transition to show green screen for 1.5 seconds
+      setTimeout(() => {
+        setState((prev) => ({
+          ...prev,
+          step: 'ACCOMMODATION',
+          scannedHospId: hospId,
+          isProcessing: false,
+        }))
+      }, 1500)
 
       return true
     },

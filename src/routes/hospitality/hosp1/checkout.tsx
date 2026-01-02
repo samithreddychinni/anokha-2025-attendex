@@ -81,8 +81,12 @@ function Hosp1Checkout() {
       }
 
       showResultFeedback('success')
-      setScannedHospId(hospId)
-      setIsProcessing(false)
+
+      // Delay transition to show green screen for 1.5 seconds
+      setTimeout(() => {
+        setScannedHospId(hospId)
+        setIsProcessing(false)
+      }, 1500)
     },
     [isProcessing, scanResult, showResultFeedback]
   )
