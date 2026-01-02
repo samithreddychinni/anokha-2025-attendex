@@ -20,6 +20,7 @@ export function useHospitalityScanner() {
   const resultTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastScannedRef = useRef<string | null>(null)
   const scanCooldownRef = useRef<NodeJS.Timeout | null>(null)
+  const isShowingOverlayRef = useRef<boolean>(false)
 
   // Show visual feedback (success/error overlay)
   const showResultFeedback = useCallback((type: 'success' | 'error') => {
@@ -27,11 +28,13 @@ export function useHospitalityScanner() {
       navigator.vibrate(type === 'success' ? 200 : 500)
     }
 
+    isShowingOverlayRef.current = true
     setState((prev) => ({ ...prev, scanResult: type }))
 
     if (resultTimeoutRef.current) clearTimeout(resultTimeoutRef.current)
     resultTimeoutRef.current = setTimeout(() => {
       setState((prev) => ({ ...prev, scanResult: undefined }))
+      isShowingOverlayRef.current = false
     }, 2000)
   }, [])
 
@@ -49,11 +52,13 @@ export function useHospitalityScanner() {
   }, [])
 
   // Handle ProfileQR scan - fetch student profile
+  // Returns: true = success, false = error (show toast), null = blocked (no toast)
   const handleProfileQRScan = useCallback(
-    async (rawText: string): Promise<boolean> => {
-      // Prevent duplicate scans
-      if (rawText === lastScannedRef.current) return false
-      if (state.isProcessing) return false
+    async (rawText: string): Promise<boolean | null> => {
+      // Prevent duplicate scans and block during overlay - return null to skip toast
+      if (rawText === lastScannedRef.current) return null
+      if (state.isProcessing) return null
+      if (isShowingOverlayRef.current) return null
 
       setState((prev) => ({ ...prev, isProcessing: true }))
       lastScannedRef.current = rawText
@@ -99,11 +104,13 @@ export function useHospitalityScanner() {
   )
 
   // Handle HospitalityID scan - validate format
+  // Returns: true = success, false = error (show toast), null = blocked (no toast)
   const handleHospIdScan = useCallback(
-    async (rawText: string): Promise<boolean> => {
-      // Prevent duplicate scans
-      if (rawText === lastScannedRef.current) return false
-      if (state.isProcessing) return false
+    async (rawText: string): Promise<boolean | null> => {
+      // Prevent duplicate scans and block during overlay - return null to skip toast
+      if (rawText === lastScannedRef.current) return null
+      if (state.isProcessing) return null
+      if (isShowingOverlayRef.current) return null
 
       setState((prev) => ({ ...prev, isProcessing: true }))
       lastScannedRef.current = rawText
@@ -171,6 +178,7 @@ export function useHospitalityScanner() {
   // Reset scanner to initial state
   const reset = useCallback(() => {
     lastScannedRef.current = null
+    isShowingOverlayRef.current = false
     if (resultTimeoutRef.current) clearTimeout(resultTimeoutRef.current)
     if (scanCooldownRef.current) clearTimeout(scanCooldownRef.current)
     setState(INITIAL_STATE)

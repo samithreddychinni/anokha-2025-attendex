@@ -19,6 +19,7 @@ import { Route as HospitalitySecurityIndexRouteImport } from './routes/hospitali
 import { Route as HospitalityHosp2IndexRouteImport } from './routes/hospitality/hosp2/index'
 import { Route as HospitalityHosp1IndexRouteImport } from './routes/hospitality/hosp1/index'
 import { Route as HospitalityFinanceIndexRouteImport } from './routes/hospitality/finance/index'
+import { Route as HospitalitySecurityHospIdRouteImport } from './routes/hospitality/security/$hospId'
 import { Route as HospitalityHosp1CheckoutRouteImport } from './routes/hospitality/hosp1/checkout'
 import { Route as HospitalityHosp1CheckinRouteImport } from './routes/hospitality/hosp1/checkin'
 import { Route as EventsEventIdSchedulesIndexRouteImport } from './routes/events/$eventId/schedules/index'
@@ -76,6 +77,12 @@ const HospitalityFinanceIndexRoute = HospitalityFinanceIndexRouteImport.update({
   path: '/hospitality/finance/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HospitalitySecurityHospIdRoute =
+  HospitalitySecurityHospIdRouteImport.update({
+    id: '/hospitality/security/$hospId',
+    path: '/hospitality/security/$hospId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HospitalityHosp1CheckoutRoute =
   HospitalityHosp1CheckoutRouteImport.update({
     id: '/hospitality/hosp1/checkout',
@@ -115,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/hospitality': typeof HospitalityIndexRoute
   '/hospitality/hosp1/checkin': typeof HospitalityHosp1CheckinRoute
   '/hospitality/hosp1/checkout': typeof HospitalityHosp1CheckoutRoute
+  '/hospitality/security/$hospId': typeof HospitalitySecurityHospIdRoute
   '/hospitality/finance': typeof HospitalityFinanceIndexRoute
   '/hospitality/hosp1': typeof HospitalityHosp1IndexRoute
   '/hospitality/hosp2': typeof HospitalityHosp2IndexRoute
@@ -132,6 +140,7 @@ export interface FileRoutesByTo {
   '/hospitality': typeof HospitalityIndexRoute
   '/hospitality/hosp1/checkin': typeof HospitalityHosp1CheckinRoute
   '/hospitality/hosp1/checkout': typeof HospitalityHosp1CheckoutRoute
+  '/hospitality/security/$hospId': typeof HospitalitySecurityHospIdRoute
   '/hospitality/finance': typeof HospitalityFinanceIndexRoute
   '/hospitality/hosp1': typeof HospitalityHosp1IndexRoute
   '/hospitality/hosp2': typeof HospitalityHosp2IndexRoute
@@ -150,6 +159,7 @@ export interface FileRoutesById {
   '/hospitality/': typeof HospitalityIndexRoute
   '/hospitality/hosp1/checkin': typeof HospitalityHosp1CheckinRoute
   '/hospitality/hosp1/checkout': typeof HospitalityHosp1CheckoutRoute
+  '/hospitality/security/$hospId': typeof HospitalitySecurityHospIdRoute
   '/hospitality/finance/': typeof HospitalityFinanceIndexRoute
   '/hospitality/hosp1/': typeof HospitalityHosp1IndexRoute
   '/hospitality/hosp2/': typeof HospitalityHosp2IndexRoute
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/hospitality'
     | '/hospitality/hosp1/checkin'
     | '/hospitality/hosp1/checkout'
+    | '/hospitality/security/$hospId'
     | '/hospitality/finance'
     | '/hospitality/hosp1'
     | '/hospitality/hosp2'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/hospitality'
     | '/hospitality/hosp1/checkin'
     | '/hospitality/hosp1/checkout'
+    | '/hospitality/security/$hospId'
     | '/hospitality/finance'
     | '/hospitality/hosp1'
     | '/hospitality/hosp2'
@@ -203,6 +215,7 @@ export interface FileRouteTypes {
     | '/hospitality/'
     | '/hospitality/hosp1/checkin'
     | '/hospitality/hosp1/checkout'
+    | '/hospitality/security/$hospId'
     | '/hospitality/finance/'
     | '/hospitality/hosp1/'
     | '/hospitality/hosp2/'
@@ -221,6 +234,7 @@ export interface RootRouteChildren {
   HospitalityIndexRoute: typeof HospitalityIndexRoute
   HospitalityHosp1CheckinRoute: typeof HospitalityHosp1CheckinRoute
   HospitalityHosp1CheckoutRoute: typeof HospitalityHosp1CheckoutRoute
+  HospitalitySecurityHospIdRoute: typeof HospitalitySecurityHospIdRoute
   HospitalityFinanceIndexRoute: typeof HospitalityFinanceIndexRoute
   HospitalityHosp1IndexRoute: typeof HospitalityHosp1IndexRoute
   HospitalityHosp2IndexRoute: typeof HospitalityHosp2IndexRoute
@@ -302,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HospitalityFinanceIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hospitality/security/$hospId': {
+      id: '/hospitality/security/$hospId'
+      path: '/hospitality/security/$hospId'
+      fullPath: '/hospitality/security/$hospId'
+      preLoaderRoute: typeof HospitalitySecurityHospIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hospitality/hosp1/checkout': {
       id: '/hospitality/hosp1/checkout'
       path: '/hospitality/hosp1/checkout'
@@ -349,6 +370,7 @@ const rootRouteChildren: RootRouteChildren = {
   HospitalityIndexRoute: HospitalityIndexRoute,
   HospitalityHosp1CheckinRoute: HospitalityHosp1CheckinRoute,
   HospitalityHosp1CheckoutRoute: HospitalityHosp1CheckoutRoute,
+  HospitalitySecurityHospIdRoute: HospitalitySecurityHospIdRoute,
   HospitalityFinanceIndexRoute: HospitalityFinanceIndexRoute,
   HospitalityHosp1IndexRoute: HospitalityHosp1IndexRoute,
   HospitalityHosp2IndexRoute: HospitalityHosp2IndexRoute,

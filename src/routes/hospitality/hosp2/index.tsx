@@ -5,9 +5,9 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { Scanner } from '@yudiel/react-qr-scanner'
 import { toast } from 'sonner'
 import {
-  ArrowLeft,
   CheckCircle2,
   XCircle,
+  X,
   Building,
   DoorOpen,
 } from 'lucide-react'
@@ -32,6 +32,7 @@ function Hosp2Scanner() {
 
   const resultTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastScannedRef = useRef<string | null>(null)
+  const isShowingOverlayRef = useRef<boolean>(false)
 
   const { data: studentResponse, isLoading: isLoadingStudent } = useStudentRecord(scannedHospId || undefined)
   const hostelCheckInMutation = useHostelCheckIn()
@@ -42,16 +43,19 @@ function Hosp2Scanner() {
     if (navigator.vibrate) {
       navigator.vibrate(type === 'success' ? 200 : 500)
     }
+    isShowingOverlayRef.current = true
     setScanResult(type)
     if (resultTimeoutRef.current) clearTimeout(resultTimeoutRef.current)
     resultTimeoutRef.current = setTimeout(() => {
       setScanResult(null)
+      isShowingOverlayRef.current = false
     }, 2000)
   }, [])
 
   const handleScan = useCallback(
     (result: any) => {
       if (!result || isProcessing || scanResult) return
+      if (isShowingOverlayRef.current) return
 
       const rawText = result?.[0]?.rawValue
       if (!rawText) return
@@ -78,8 +82,12 @@ function Hosp2Scanner() {
       }
 
       showResultFeedback('success')
-      setScannedHospId(hospId)
-      setIsProcessing(false)
+
+      // Delay transition to show green screen
+      setTimeout(() => {
+        setScannedHospId(hospId)
+        setIsProcessing(false)
+      }, 1500)
     },
     [isProcessing, scanResult, showResultFeedback]
   )
@@ -103,6 +111,7 @@ function Hosp2Scanner() {
   const resetScanner = () => {
     setScannedHospId(null)
     lastScannedRef.current = null
+    isShowingOverlayRef.current = false
   }
 
   const previewStyle: React.CSSProperties = {
@@ -118,14 +127,18 @@ function Hosp2Scanner() {
     return (
       <div className="min-h-[calc(100vh-80px)] p-4">
         <div className="max-w-md mx-auto space-y-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={resetScanner}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+          {/* Header with X button on right */}
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold">HOSP 2</h1>
               <p className="text-sm text-muted-foreground">Hostel Check-in</p>
             </div>
+            <button
+              onClick={resetScanner}
+              className="p-2 rounded-full hover:bg-muted transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
           </div>
 
           <StudentCard student={student} showStatus />
@@ -134,7 +147,7 @@ function Hosp2Scanner() {
           <div className="space-y-3">
             {canCheckIn ? (
               <Button
-                className="w-full"
+                className="w-full h-14 text-lg"
                 size="lg"
                 onClick={() => setShowConfirmModal(true)}
               >
@@ -157,10 +170,6 @@ function Hosp2Scanner() {
               </div>
             )}
           </div>
-
-          <Button variant="outline" className="w-full" onClick={resetScanner}>
-            Scan Another
-          </Button>
         </div>
 
         <ConfirmationModal
@@ -192,14 +201,18 @@ function Hosp2Scanner() {
     return (
       <div className="min-h-[calc(100vh-80px)] p-4">
         <div className="max-w-md mx-auto space-y-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={resetScanner}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+          {/* Header with X button on right */}
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold">HOSP 2</h1>
               <p className="text-sm text-muted-foreground">Student not found</p>
             </div>
+            <button
+              onClick={resetScanner}
+              className="p-2 rounded-full hover:bg-muted transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
           </div>
 
           <div className="text-center p-8 bg-destructive/10 rounded-lg">
@@ -207,10 +220,6 @@ function Hosp2Scanner() {
             <p className="font-medium text-destructive">Student Not Found</p>
             <p className="text-sm text-muted-foreground mt-2">{studentResponse.error}</p>
           </div>
-
-          <Button className="w-full" onClick={resetScanner}>
-            Scan Again
-          </Button>
         </div>
       </div>
     )
@@ -234,18 +243,18 @@ function Hosp2Scanner() {
       )}
 
       <div className="absolute top-0 left-0 right-0 z-40 p-4 flex justify-between items-start bg-gradient-to-b from-black/80 to-transparent">
-        <Link
-          to="/hospitality"
-          className="p-3 bg-black/40 backdrop-blur-md rounded-full text-white active:scale-95 transition-transform"
-        >
-          <ArrowLeft size={24} />
-        </Link>
+        <div className="w-10" />
         <div className="bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
           <p className="text-xs text-white/70 font-medium uppercase tracking-widest text-center">
             Hostel Check-in
           </p>
         </div>
-        <div className="w-10" />
+        <Link
+          to="/hospitality"
+          className="p-3 bg-black/40 backdrop-blur-md rounded-full text-white active:scale-95 transition-transform"
+        >
+          <X size={24} />
+        </Link>
       </div>
 
       <div className="relative flex-1 bg-black overflow-hidden flex items-center justify-center">

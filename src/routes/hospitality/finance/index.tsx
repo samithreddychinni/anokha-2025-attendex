@@ -5,9 +5,9 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { Scanner } from '@yudiel/react-qr-scanner'
 import { toast } from 'sonner'
 import {
-  ArrowLeft,
   CheckCircle2,
   XCircle,
+  X,
   Wallet,
   CreditCard,
 } from 'lucide-react'
@@ -32,6 +32,7 @@ function FinanceScanner() {
 
   const resultTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastScannedRef = useRef<string | null>(null)
+  const isShowingOverlayRef = useRef<boolean>(false)
 
   const { data: studentResponse, isLoading: isLoadingStudent } = useStudentRecord(scannedHospId || undefined)
   const processPaymentMutation = useProcessPayment()
@@ -42,16 +43,19 @@ function FinanceScanner() {
     if (navigator.vibrate) {
       navigator.vibrate(type === 'success' ? 200 : 500)
     }
+    isShowingOverlayRef.current = true
     setScanResult(type)
     if (resultTimeoutRef.current) clearTimeout(resultTimeoutRef.current)
     resultTimeoutRef.current = setTimeout(() => {
       setScanResult(null)
+      isShowingOverlayRef.current = false
     }, 2000)
   }, [])
 
   const handleScan = useCallback(
     (result: any) => {
       if (!result || isProcessing || scanResult) return
+      if (isShowingOverlayRef.current) return
 
       const rawText = result?.[0]?.rawValue
       if (!rawText) return
@@ -78,8 +82,12 @@ function FinanceScanner() {
       }
 
       showResultFeedback('success')
-      setScannedHospId(hospId)
-      setIsProcessing(false)
+
+      // Delay transition to show green screen
+      setTimeout(() => {
+        setScannedHospId(hospId)
+        setIsProcessing(false)
+      }, 1500)
     },
     [isProcessing, scanResult, showResultFeedback]
   )
@@ -107,6 +115,7 @@ function FinanceScanner() {
   const resetScanner = () => {
     setScannedHospId(null)
     lastScannedRef.current = null
+    isShowingOverlayRef.current = false
   }
 
   const previewStyle: React.CSSProperties = {
@@ -122,14 +131,18 @@ function FinanceScanner() {
     return (
       <div className="min-h-[calc(100vh-80px)] p-4">
         <div className="max-w-md mx-auto space-y-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={resetScanner}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+          {/* Header with X button on right */}
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold">Finance</h1>
               <p className="text-sm text-muted-foreground">Payment Verification</p>
             </div>
+            <button
+              onClick={resetScanner}
+              className="p-2 rounded-full hover:bg-muted transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
           </div>
 
           <StudentCard student={student} showStatus />
@@ -138,7 +151,7 @@ function FinanceScanner() {
           <div className="space-y-3">
             {canProcessPayment ? (
               <Button
-                className="w-full"
+                className="w-full h-14 text-lg"
                 size="lg"
                 onClick={() => setShowConfirmModal(true)}
               >
@@ -161,10 +174,6 @@ function FinanceScanner() {
               </div>
             )}
           </div>
-
-          <Button variant="outline" className="w-full" onClick={resetScanner}>
-            Scan Another
-          </Button>
         </div>
 
         <ConfirmationModal
@@ -196,14 +205,18 @@ function FinanceScanner() {
     return (
       <div className="min-h-[calc(100vh-80px)] p-4">
         <div className="max-w-md mx-auto space-y-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={resetScanner}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+          {/* Header with X button on right */}
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold">Finance</h1>
               <p className="text-sm text-muted-foreground">Student not found</p>
             </div>
+            <button
+              onClick={resetScanner}
+              className="p-2 rounded-full hover:bg-muted transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
           </div>
 
           <div className="text-center p-8 bg-destructive/10 rounded-lg">
@@ -211,10 +224,6 @@ function FinanceScanner() {
             <p className="font-medium text-destructive">Student Not Found</p>
             <p className="text-sm text-muted-foreground mt-2">{studentResponse.error}</p>
           </div>
-
-          <Button className="w-full" onClick={resetScanner}>
-            Scan Again
-          </Button>
         </div>
       </div>
     )
@@ -238,18 +247,18 @@ function FinanceScanner() {
       )}
 
       <div className="absolute top-0 left-0 right-0 z-40 p-4 flex justify-between items-start bg-gradient-to-b from-black/80 to-transparent">
-        <Link
-          to="/hospitality"
-          className="p-3 bg-black/40 backdrop-blur-md rounded-full text-white active:scale-95 transition-transform"
-        >
-          <ArrowLeft size={24} />
-        </Link>
+        <div className="w-10" />
         <div className="bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
           <p className="text-xs text-white/70 font-medium uppercase tracking-widest text-center">
             Finance Scanner
           </p>
         </div>
-        <div className="w-10" />
+        <Link
+          to="/hospitality"
+          className="p-3 bg-black/40 backdrop-blur-md rounded-full text-white active:scale-95 transition-transform"
+        >
+          <X size={24} />
+        </Link>
       </div>
 
       <div className="relative flex-1 bg-black overflow-hidden flex items-center justify-center">

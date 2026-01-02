@@ -67,7 +67,8 @@ function Hosp1Checkin() {
 
       if (state.step === 'PROFILE_QR') {
         const success = await handleProfileQRScan(rawText)
-        if (!success) {
+        // Only show toast on actual failure (false), not when blocked (null)
+        if (success === false) {
           toast.error('Invalid QR', {
             description: 'Please scan a valid Profile QR code',
             position: 'bottom-center',
@@ -75,7 +76,8 @@ function Hosp1Checkin() {
         }
       } else if (state.step === 'HOSP_ID') {
         const success = await handleHospIdScan(rawText)
-        if (!success) {
+        // Only show toast on actual failure (false), not when blocked (null)
+        if (success === false) {
           toast.error('Invalid ID', {
             description: 'Please scan a valid Hospitality ID (e.g., A123)',
             position: 'bottom-center',
