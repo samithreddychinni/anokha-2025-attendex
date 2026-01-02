@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'sonner'
+import { Eye, EyeOff } from 'lucide-react'
 
 export function LoginComponent() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const { login, isLoading, user } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
@@ -33,15 +35,6 @@ export function LoginComponent() {
 
   return (
     <div className="h-[100dvh] w-full flex items-center justify-center p-4 relative overflow-hidden">
-      <div
-        className="absolute inset-0 -z-10 pointer-events-none flex items-center justify-center opacity-5 dark:opacity-10 bg-no-repeat bg-center transition-opacity duration-300"
-        style={{
-          backgroundImage: "url('/mascot-flag.webp')",
-          backgroundSize: "contain",
-          backgroundPosition: "center",
-        }}
-      />
-      
       <div className="w-full max-w-sm md:max-w-md bg-card/50 backdrop-blur-xl border border-border rounded-xl p-6 md:p-8 shadow-2xl relative z-10 max-h-full overflow-y-auto">
         <div className="flex flex-col items-center mb-6">
           <div className="bg-primary/10 p-3 rounded-full mb-4">
@@ -66,14 +59,24 @@ export function LoginComponent() {
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 bg-background border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm placeholder:text-muted-foreground/50"
-              placeholder="••••••••"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-3 py-2 pr-10 bg-background border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm placeholder:text-muted-foreground/50"
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
           <button
