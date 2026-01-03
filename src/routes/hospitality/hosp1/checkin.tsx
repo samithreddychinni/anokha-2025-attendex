@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Scanner } from '@yudiel/react-qr-scanner'
 import { toast } from 'sonner'
@@ -20,6 +20,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+
 import { HostelSelector } from '@/components/hospitality/HostelSelector'
 import { ConfirmationModal } from '@/components/hospitality/ConfirmationModal'
 import { Calendar } from '@/components/ui/calendar'
@@ -29,7 +31,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { format } from 'date-fns'
+import { format, differenceInCalendarDays } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useHospitalityScanner } from '@/hooks/hospitality/useHospitalityScanner'
@@ -47,11 +49,26 @@ function Hosp1Checkin() {
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [daysStaying, setDaysStaying] = useState<number>(1)
   const [showHostelSelection, setShowHostelSelection] = useState(false)
+
+  // Check-in State
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [time, setTime] = useState<string>(() => {
     const now = new Date()
     return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
   })
+
+  // Check-out State
+  const [checkOutDate, setCheckOutDate] = useState<Date | undefined>(() => {
+    const d = new Date()
+    d.setDate(d.getDate() + 1)
+    return d
+  })
+  const [checkOutTime, setCheckOutTime] = useState<string>('10:00')
+
+  // Editable Fields
+  const [college, setCollege] = useState('')
+  const [studentId, setStudentId] = useState('')
+
   const daysOptions = [1, 2, 3, 4]
 
   const {
@@ -62,6 +79,30 @@ function Hosp1Checkin() {
     reset,
     goBack,
   } = useHospitalityScanner()
+
+  // Sync profile data to editable fields when scanned
+  useEffect(() => {
+    if (state.studentProfile) {
+      setCollege(state.studentProfile.college)
+      setStudentId(state.studentProfile.student_id)
+    }
+  }, [state.studentProfile])
+
+  // Calculate days staying
+  useEffect(() => {
+    if (date && checkOutDate) {
+      const days = differenceInCalendarDays(checkOutDate, date)
+      const adjustedDays = Math.max(1, days) // Minimum 1 day
+      // Optionally cap at 4 or just let it be flexible?
+      // For now, let's just set it. 
+      // If user wants strict 1-4, we can clamp.
+      if (adjustedDays <= 4) {
+        setDaysStaying(adjustedDays)
+      } else {
+        setDaysStaying(adjustedDays) // Allow more than 4 if calculated? Or cap?
+      }
+    }
+  }, [date, checkOutDate])
 
   const { data: hostelsResponse, isLoading: isLoadingHostels } = useHostels()
   const createMappingMutation = useCreateStudentMapping()
@@ -282,11 +323,19 @@ function Hosp1Checkin() {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Building className="h-4 w-4" />
-                    <span>{state.studentProfile.college}</span>
+                    <Input
+                      value={college}
+                      onChange={(e) => setCollege(e.target.value)}
+                      className="h-8"
+                    />
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <GraduationCap className="h-4 w-4" />
-                    <span className="font-mono text-xs">{state.studentProfile.student_id}</span>
+                    <Input
+                      value={studentId}
+                      onChange={(e) => setStudentId(e.target.value)}
+                      className="h-8 font-mono text-xs"
+                    />
                   </div>
                 </div>
 
@@ -301,6 +350,84 @@ function Hosp1Checkin() {
                       {state.scannedHospId}
                     </span>
                   </div>
+                </div>
+
+                {/* Check-in / Check-out Section */}
+                <div className="pt-3 border-t grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <span className="text-xs font-medium text-muted-foreground">Check-in</span>
+                    <div className="flex flex-col gap-2">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant={"outline"}
+                            size="sm"
+                            className={cn(
+                              "w-full justify-start text-left font-normal text-xs",
+                              !date && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-3 w-3" />
+                            {date ? format(date, "MMM dd") : <span>Date</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={setDate}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <TimePicker
+                        value={time}
+                        onChange={setTime}
+                        className="w-full text-xs h-8"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <span className="text-xs font-medium text-muted-foreground">Check-out</span>
+                    <div className="flex flex-col gap-2">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant={"outline"}
+                            size="sm"
+                            className={cn(
+                              "w-full justify-start text-left font-normal text-xs",
+                              !checkOutDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-3 w-3" />
+                            {checkOutDate ? format(checkOutDate, "MMM dd") : <span>Date</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={checkOutDate}
+                            onSelect={setCheckOutDate}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <TimePicker
+                        value={checkOutTime}
+                        onChange={setCheckOutTime}
+                        className="w-full text-xs h-8"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Duration Display */}
+                <div className="pt-2 text-center">
+                  <p className="text-xs text-muted-foreground">
+                    Duration: <span className="font-bold text-foreground">{daysStaying} {daysStaying === 1 ? 'Day' : 'Days'}</span>
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -349,43 +476,22 @@ function Hosp1Checkin() {
             </div>
           </div>
 
-          {/* Check-in Date & Time */}
+
+
+          {/* Hostel Selection */}
           <div className="space-y-3">
-            <p className="text-sm font-medium">Check-in Date & Time</p>
-            <div className="flex gap-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-[240px] justify-start text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <TimePicker
-                value={time}
-                onChange={setTime}
-                className="w-[120px]"
-              />
-            </div>
+            <p className="text-sm font-medium">Available Hostels</p>
+            <HostelSelector
+              hostels={hostels}
+              selectedHostelId={state.selectedHostel?.id}
+              onSelect={setSelectedHostel}
+              isLoading={isLoadingHostels}
+            />
           </div>
 
           {/* Days Selection */}
           <div className="space-y-3">
-            <p className="text-sm font-medium">Number of Days</p>
+            <p className="text-sm font-medium">Pricing (days)</p>
             <div className="grid grid-cols-4 gap-3">
               {daysOptions.map((days) => {
                 const isSelected = daysStaying === days
@@ -409,17 +515,6 @@ function Hosp1Checkin() {
                 )
               })}
             </div>
-          </div>
-
-          {/* Hostel Selection */}
-          <div className="space-y-3">
-            <p className="text-sm font-medium">Available Hostels</p>
-            <HostelSelector
-              hostels={hostels}
-              selectedHostelId={state.selectedHostel?.id}
-              onSelect={setSelectedHostel}
-              isLoading={isLoadingHostels}
-            />
           </div>
 
           {/* Action button */}
