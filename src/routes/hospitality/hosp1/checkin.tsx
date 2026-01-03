@@ -31,7 +31,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { format, differenceInCalendarDays } from 'date-fns'
+import { format } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useHospitalityScanner } from '@/hooks/hospitality/useHospitalityScanner'
@@ -57,14 +57,6 @@ function Hosp1Checkin() {
     return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
   })
 
-  // Check-out State
-  const [checkOutDate, setCheckOutDate] = useState<Date | undefined>(() => {
-    const d = new Date()
-    d.setDate(d.getDate() + 1)
-    return d
-  })
-  const [checkOutTime, setCheckOutTime] = useState<string>('10:00')
-
   // Editable Fields
   const [college, setCollege] = useState('')
   const [studentId, setStudentId] = useState('')
@@ -87,22 +79,6 @@ function Hosp1Checkin() {
       setStudentId(state.studentProfile.student_id)
     }
   }, [state.studentProfile])
-
-  // Calculate days staying
-  useEffect(() => {
-    if (date && checkOutDate) {
-      const days = differenceInCalendarDays(checkOutDate, date)
-      const adjustedDays = Math.max(1, days) // Minimum 1 day
-      // Optionally cap at 4 or just let it be flexible?
-      // For now, let's just set it. 
-      // If user wants strict 1-4, we can clamp.
-      if (adjustedDays <= 4) {
-        setDaysStaying(adjustedDays)
-      } else {
-        setDaysStaying(adjustedDays) // Allow more than 4 if calculated? Or cap?
-      }
-    }
-  }, [date, checkOutDate])
 
   const { data: hostelsResponse, isLoading: isLoadingHostels } = useHostels()
   const createMappingMutation = useCreateStudentMapping()
@@ -194,6 +170,7 @@ function Hosp1Checkin() {
       navigate({ to: '/hospitality/hosp1' })
     }
   }
+
 
   // Check if we can proceed to confirmation
   const canProceedToConfirm = needsHostel ? !!state.selectedHostel : true
@@ -352,8 +329,8 @@ function Hosp1Checkin() {
                   </div>
                 </div>
 
-                {/* Check-in / Check-out Section */}
-                <div className="pt-3 border-t grid grid-cols-2 gap-4">
+                {/* Check-in Date & Time */}
+                <div className="pt-3 border-t">
                   <div className="space-y-2">
                     <span className="text-xs font-medium text-muted-foreground">Check-in</span>
                     <div className="flex flex-col gap-2">
@@ -387,47 +364,6 @@ function Hosp1Checkin() {
                       />
                     </div>
                   </div>
-
-                  <div className="space-y-2">
-                    <span className="text-xs font-medium text-muted-foreground">Check-out</span>
-                    <div className="flex flex-col gap-2">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant={"outline"}
-                            size="sm"
-                            className={cn(
-                              "w-full justify-start text-left font-normal text-xs",
-                              !checkOutDate && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-3 w-3" />
-                            {checkOutDate ? format(checkOutDate, "MMM dd") : <span>Date</span>}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={checkOutDate}
-                            onSelect={setCheckOutDate}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <TimePicker
-                        value={checkOutTime}
-                        onChange={setCheckOutTime}
-                        className="w-full text-xs h-8"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Duration Display */}
-                <div className="pt-2 text-center">
-                  <p className="text-xs text-muted-foreground">
-                    Duration: <span className="font-bold text-foreground">{daysStaying} {daysStaying === 1 ? 'Day' : 'Days'}</span>
-                  </p>
                 </div>
               </CardContent>
             </Card>
