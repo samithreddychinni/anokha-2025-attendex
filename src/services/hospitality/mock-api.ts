@@ -133,6 +133,7 @@ export const hospitalityMockAPI = {
       accommodation_type: req.accommodation_type,
       accommodation_status: initialStatus,
       hostel_name: req.hostel_name,
+      hostel_id: req.hostel_id,
       check_in_date: req.check_in_date || now,
       daily_check_ins: req.accommodation_type === 'NONE' ? [] : undefined,
       created_at: now,
@@ -247,7 +248,9 @@ export const hospitalityMockAPI = {
     })
 
     // Update hostel occupancy
-    if (record.hostel_name) {
+    if (record.hostel_id) {
+      mockDB.updateHostelOccupancy(record.hostel_id, -1)
+    } else if (record.hostel_name) {
       const hostel = mockDB.getHostelByName(record.hostel_name)
       if (hostel) {
         mockDB.updateHostelOccupancy(hostel.id, -1)
@@ -316,12 +319,18 @@ export const hospitalityMockAPI = {
       }
     }
 
-    if (!record.hostel_name) {
+    if (!record.hostel_name && !record.hostel_id) {
       return { success: false, error: 'No hostel assigned to this student' }
     }
 
     // Check hostel availability
-    const hostel = mockDB.getHostelByName(record.hostel_name)
+    let hostel
+    if (record.hostel_id) {
+      hostel = mockDB.getHostelById(record.hostel_id)
+    } else if (record.hostel_name) {
+      hostel = mockDB.getHostelByName(record.hostel_name)
+    }
+
     if (!hostel || hostel.available_beds <= 0) {
       return { success: false, error: 'No beds available in assigned hostel' }
     }

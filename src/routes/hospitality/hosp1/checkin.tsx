@@ -106,6 +106,7 @@ function Hosp1Checkin() {
       hospitality_id: state.scannedHospId,
       accommodation_type: accommodationType,
       hostel_name: state.selectedHostel?.name,
+      hostel_id: state.selectedHostel?.id,
     })
 
     setShowConfirmModal(false)
@@ -148,9 +149,8 @@ function Hosp1Checkin() {
         {/* Scan result overlay - blocks all interactions */}
         {state.scanResult && (
           <div
-            className={`absolute inset-0 z-[60] flex items-center justify-center transition-opacity duration-300 ${
-              state.scanResult === 'success' ? 'bg-green-500/90' : 'bg-red-500/90'
-            }`}
+            className={`absolute inset-0 z-[60] flex items-center justify-center transition-opacity duration-300 ${state.scanResult === 'success' ? 'bg-green-500/90' : 'bg-red-500/90'
+              }`}
           >
             {state.scanResult === 'success' ? (
               <CheckCircle2 className="w-32 h-32 text-white animate-pulse" strokeWidth={2} />
@@ -357,7 +357,7 @@ function Hosp1Checkin() {
           onClose={() => setShowConfirmModal(false)}
           onConfirm={handleConfirmMapping}
           title="Confirm Registration"
-          description={`Register ${state.studentProfile?.name} with Hospitality ID ${state.scannedHospId}? Hostel: ${state.selectedHostel?.name}`}
+          description={`Register ${state.studentProfile?.name} with Hospitality ID ${state.scannedHospId}? Hostel: ${state.selectedHostel?.name} (${state.selectedHostel?.sharing})`}
           confirmText="Confirm Registration"
           isLoading={createMappingMutation.isPending}
         />

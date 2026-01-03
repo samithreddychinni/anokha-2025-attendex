@@ -53,6 +53,7 @@ export interface StudentRecord {
   // Accommodation Details
   accommodation_type: AccommodationType
   accommodation_status: AccommodationStatus
+  hostel_id?: string
   hostel_name?: string
 
   // Timestamps (all ISO strings)
@@ -80,6 +81,8 @@ export interface DailyCheckIn {
 export interface Hostel {
   id: string
   name: string
+  sharing: string
+  price: number
   total_beds: number
   occupied_beds: number
   available_beds: number
@@ -106,6 +109,7 @@ export interface CreateStudentMappingRequest {
   student_id: string
   hospitality_id: HospitalityID
   accommodation_type: AccommodationType
+  hostel_id?: string
   hostel_name?: string
   check_in_date?: string
 }
