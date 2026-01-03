@@ -22,6 +22,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { HostelSelector } from '@/components/hospitality/HostelSelector'
 import { ConfirmationModal } from '@/components/hospitality/ConfirmationModal'
+import { Calendar } from '@/components/ui/calendar'
+import { TimePicker } from '@/components/ui/time-picker'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { format } from 'date-fns'
+import { Calendar as CalendarIcon } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { useHospitalityScanner } from '@/hooks/hospitality/useHospitalityScanner'
 import {
   useHostels,
@@ -35,7 +45,14 @@ export const Route = createFileRoute('/hospitality/hosp1/checkin')({
 function Hosp1Checkin() {
   const navigate = useNavigate()
   const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [daysStaying, setDaysStaying] = useState<number>(1)
   const [showHostelSelection, setShowHostelSelection] = useState(false)
+  const [date, setDate] = useState<Date | undefined>(new Date())
+  const [time, setTime] = useState<string>(() => {
+    const now = new Date()
+    return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+  })
+  const daysOptions = [1, 2, 3, 4]
 
   const {
     state,
@@ -107,6 +124,10 @@ function Hosp1Checkin() {
       accommodation_type: accommodationType,
       hostel_name: state.selectedHostel?.name,
       hostel_id: state.selectedHostel?.id,
+      days_staying: daysStaying,
+      check_in_date: date && time
+        ? new Date(`${format(date, 'yyyy-MM-dd')}T${time}`).toISOString()
+        : new Date().toISOString(),
     })
 
     setShowConfirmModal(false)
@@ -298,7 +319,6 @@ function Hosp1Checkin() {
       </div>
     )
   }
-
   // Render hostel selection view (for EXTERNAL students)
   if (state.step === 'ACCOMMODATION' && showHostelSelection && needsHostel) {
     return (
@@ -329,6 +349,68 @@ function Hosp1Checkin() {
             </div>
           </div>
 
+          {/* Check-in Date & Time */}
+          <div className="space-y-3">
+            <p className="text-sm font-medium">Check-in Date & Time</p>
+            <div className="flex gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-[240px] justify-start text-left font-normal",
+                      !date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <TimePicker
+                value={time}
+                onChange={setTime}
+                className="w-[120px]"
+              />
+            </div>
+          </div>
+
+          {/* Days Selection */}
+          <div className="space-y-3">
+            <p className="text-sm font-medium">Number of Days</p>
+            <div className="grid grid-cols-4 gap-3">
+              {daysOptions.map((days) => {
+                const isSelected = daysStaying === days
+                return (
+                  <div
+                    key={days}
+                    onClick={() => setDaysStaying(days)}
+                    className={`
+                      cursor-pointer rounded-xl border p-4 text-center transition-all duration-200
+                      ${isSelected
+                        ? 'border-primary bg-primary/20 ring-2 ring-inset ring-primary'
+                        : 'border-border hover:bg-muted/50'
+                      }
+                    `}
+                  >
+                    <div className="text-lg font-bold">{days}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {days === 1 ? 'Day' : 'Days'}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
           {/* Hostel Selection */}
           <div className="space-y-3">
             <p className="text-sm font-medium">Available Hostels</p>
@@ -355,9 +437,13 @@ function Hosp1Checkin() {
         <ConfirmationModal
           isOpen={showConfirmModal}
           onClose={() => setShowConfirmModal(false)}
-          onConfirm={handleConfirmMapping}
+          onConfirm={() => {
+            // Pass daysStaying to the mutation via handleConfirmMapping wrapper or state update
+            // We need to update handleConfirmMapping to read daysStaying
+            handleConfirmMapping()
+          }}
           title="Confirm Registration"
-          description={`Register ${state.studentProfile?.name} with Hospitality ID ${state.scannedHospId}? Hostel: ${state.selectedHostel?.name} (${state.selectedHostel?.sharing})`}
+          description={`Register ${state.studentProfile?.name} with Hospitality ID ${state.scannedHospId}? Hostel: ${state.selectedHostel?.name} for ${daysStaying} ${daysStaying === 1 ? 'day' : 'days'}`}
           confirmText="Confirm Registration"
           isLoading={createMappingMutation.isPending}
         />

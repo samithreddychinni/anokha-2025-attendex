@@ -38,9 +38,6 @@ export function HostelSelector({
               <th className="px-2 sm:px-4 py-3 text-left font-medium text-muted-foreground">
                 Type
               </th>
-              <th className="px-2 sm:px-4 py-3 text-left font-medium text-muted-foreground">
-                Price
-              </th>
               <th className="px-2 sm:px-4 py-3 text-right font-medium text-muted-foreground whitespace-nowrap">
                 Beds Left
               </th>
@@ -50,6 +47,10 @@ export function HostelSelector({
             {hostels.map((hostel) => {
               const isSelected = selectedHostelId === hostel.id
               const isDisabled = hostel.available_beds <= 0
+
+              const parts = hostel.name.split('-')
+              const name = parts[0].trim()
+              const sharing = parts.length > 1 ? parts.slice(1).join('-').trim() : undefined
 
               return (
                 <tr
@@ -62,13 +63,10 @@ export function HostelSelector({
                   )}
                 >
                   <td className="px-2 sm:px-4 py-3 font-medium">
-                    {hostel.name}
+                    {name}
                   </td>
                   <td className="px-2 sm:px-4 py-3 text-muted-foreground">
-                    {hostel.sharing}
-                  </td>
-                  <td className="px-2 sm:px-4 py-3 font-medium">
-                    ₹{hostel.price}
+                    {sharing || 'Standard'}
                   </td>
                   <td className="px-2 sm:px-4 py-3 text-right">
                     <span

@@ -134,6 +134,7 @@ export const hospitalityMockAPI = {
       accommodation_status: initialStatus,
       hostel_name: req.hostel_name,
       hostel_id: req.hostel_id,
+      days_staying: req.days_staying,
       check_in_date: req.check_in_date || now,
       daily_check_ins: req.accommodation_type === 'NONE' ? [] : undefined,
       created_at: now,
