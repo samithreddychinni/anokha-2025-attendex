@@ -20,8 +20,10 @@ import { Route as HospitalityHosp2IndexRouteImport } from './routes/hospitality/
 import { Route as HospitalityHosp1IndexRouteImport } from './routes/hospitality/hosp1/index'
 import { Route as HospitalityFinanceIndexRouteImport } from './routes/hospitality/finance/index'
 import { Route as HospitalitySecurityHospIdRouteImport } from './routes/hospitality/security/$hospId'
+import { Route as HospitalityHosp2ScannerRouteImport } from './routes/hospitality/hosp2/scanner'
 import { Route as HospitalityHosp1CheckoutRouteImport } from './routes/hospitality/hosp1/checkout'
 import { Route as HospitalityHosp1CheckinRouteImport } from './routes/hospitality/hosp1/checkin'
+import { Route as HospitalityFinanceScannerRouteImport } from './routes/hospitality/finance/scanner'
 import { Route as EventsEventIdSchedulesIndexRouteImport } from './routes/events/$eventId/schedules/index'
 import { Route as EventsEventIdSchedulesScheduleIdPreviewRouteImport } from './routes/events/$eventId/schedules/$scheduleId/preview'
 import { Route as EventsEventIdSchedulesScheduleIdAttendanceRouteImport } from './routes/events/$eventId/schedules/$scheduleId/attendance'
@@ -83,6 +85,11 @@ const HospitalitySecurityHospIdRoute =
     path: '/hospitality/security/$hospId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const HospitalityHosp2ScannerRoute = HospitalityHosp2ScannerRouteImport.update({
+  id: '/hospitality/hosp2/scanner',
+  path: '/hospitality/hosp2/scanner',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HospitalityHosp1CheckoutRoute =
   HospitalityHosp1CheckoutRouteImport.update({
     id: '/hospitality/hosp1/checkout',
@@ -94,6 +101,12 @@ const HospitalityHosp1CheckinRoute = HospitalityHosp1CheckinRouteImport.update({
   path: '/hospitality/hosp1/checkin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HospitalityFinanceScannerRoute =
+  HospitalityFinanceScannerRouteImport.update({
+    id: '/hospitality/finance/scanner',
+    path: '/hospitality/finance/scanner',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EventsEventIdSchedulesIndexRoute =
   EventsEventIdSchedulesIndexRouteImport.update({
     id: '/events/$eventId/schedules/',
@@ -120,8 +133,10 @@ export interface FileRoutesByFullPath {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/events': typeof EventsIndexRoute
   '/hospitality': typeof HospitalityIndexRoute
+  '/hospitality/finance/scanner': typeof HospitalityFinanceScannerRoute
   '/hospitality/hosp1/checkin': typeof HospitalityHosp1CheckinRoute
   '/hospitality/hosp1/checkout': typeof HospitalityHosp1CheckoutRoute
+  '/hospitality/hosp2/scanner': typeof HospitalityHosp2ScannerRoute
   '/hospitality/security/$hospId': typeof HospitalitySecurityHospIdRoute
   '/hospitality/finance': typeof HospitalityFinanceIndexRoute
   '/hospitality/hosp1': typeof HospitalityHosp1IndexRoute
@@ -138,8 +153,10 @@ export interface FileRoutesByTo {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/events': typeof EventsIndexRoute
   '/hospitality': typeof HospitalityIndexRoute
+  '/hospitality/finance/scanner': typeof HospitalityFinanceScannerRoute
   '/hospitality/hosp1/checkin': typeof HospitalityHosp1CheckinRoute
   '/hospitality/hosp1/checkout': typeof HospitalityHosp1CheckoutRoute
+  '/hospitality/hosp2/scanner': typeof HospitalityHosp2ScannerRoute
   '/hospitality/security/$hospId': typeof HospitalitySecurityHospIdRoute
   '/hospitality/finance': typeof HospitalityFinanceIndexRoute
   '/hospitality/hosp1': typeof HospitalityHosp1IndexRoute
@@ -157,8 +174,10 @@ export interface FileRoutesById {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/events/': typeof EventsIndexRoute
   '/hospitality/': typeof HospitalityIndexRoute
+  '/hospitality/finance/scanner': typeof HospitalityFinanceScannerRoute
   '/hospitality/hosp1/checkin': typeof HospitalityHosp1CheckinRoute
   '/hospitality/hosp1/checkout': typeof HospitalityHosp1CheckoutRoute
+  '/hospitality/hosp2/scanner': typeof HospitalityHosp2ScannerRoute
   '/hospitality/security/$hospId': typeof HospitalitySecurityHospIdRoute
   '/hospitality/finance/': typeof HospitalityFinanceIndexRoute
   '/hospitality/hosp1/': typeof HospitalityHosp1IndexRoute
@@ -177,8 +196,10 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/events'
     | '/hospitality'
+    | '/hospitality/finance/scanner'
     | '/hospitality/hosp1/checkin'
     | '/hospitality/hosp1/checkout'
+    | '/hospitality/hosp2/scanner'
     | '/hospitality/security/$hospId'
     | '/hospitality/finance'
     | '/hospitality/hosp1'
@@ -195,8 +216,10 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/events'
     | '/hospitality'
+    | '/hospitality/finance/scanner'
     | '/hospitality/hosp1/checkin'
     | '/hospitality/hosp1/checkout'
+    | '/hospitality/hosp2/scanner'
     | '/hospitality/security/$hospId'
     | '/hospitality/finance'
     | '/hospitality/hosp1'
@@ -213,8 +236,10 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/events/'
     | '/hospitality/'
+    | '/hospitality/finance/scanner'
     | '/hospitality/hosp1/checkin'
     | '/hospitality/hosp1/checkout'
+    | '/hospitality/hosp2/scanner'
     | '/hospitality/security/$hospId'
     | '/hospitality/finance/'
     | '/hospitality/hosp1/'
@@ -232,8 +257,10 @@ export interface RootRouteChildren {
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   EventsIndexRoute: typeof EventsIndexRoute
   HospitalityIndexRoute: typeof HospitalityIndexRoute
+  HospitalityFinanceScannerRoute: typeof HospitalityFinanceScannerRoute
   HospitalityHosp1CheckinRoute: typeof HospitalityHosp1CheckinRoute
   HospitalityHosp1CheckoutRoute: typeof HospitalityHosp1CheckoutRoute
+  HospitalityHosp2ScannerRoute: typeof HospitalityHosp2ScannerRoute
   HospitalitySecurityHospIdRoute: typeof HospitalitySecurityHospIdRoute
   HospitalityFinanceIndexRoute: typeof HospitalityFinanceIndexRoute
   HospitalityHosp1IndexRoute: typeof HospitalityHosp1IndexRoute
@@ -323,6 +350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HospitalitySecurityHospIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hospitality/hosp2/scanner': {
+      id: '/hospitality/hosp2/scanner'
+      path: '/hospitality/hosp2/scanner'
+      fullPath: '/hospitality/hosp2/scanner'
+      preLoaderRoute: typeof HospitalityHosp2ScannerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hospitality/hosp1/checkout': {
       id: '/hospitality/hosp1/checkout'
       path: '/hospitality/hosp1/checkout'
@@ -335,6 +369,13 @@ declare module '@tanstack/react-router' {
       path: '/hospitality/hosp1/checkin'
       fullPath: '/hospitality/hosp1/checkin'
       preLoaderRoute: typeof HospitalityHosp1CheckinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hospitality/finance/scanner': {
+      id: '/hospitality/finance/scanner'
+      path: '/hospitality/finance/scanner'
+      fullPath: '/hospitality/finance/scanner'
+      preLoaderRoute: typeof HospitalityFinanceScannerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/events/$eventId/schedules/': {
@@ -368,8 +409,10 @@ const rootRouteChildren: RootRouteChildren = {
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   EventsIndexRoute: EventsIndexRoute,
   HospitalityIndexRoute: HospitalityIndexRoute,
+  HospitalityFinanceScannerRoute: HospitalityFinanceScannerRoute,
   HospitalityHosp1CheckinRoute: HospitalityHosp1CheckinRoute,
   HospitalityHosp1CheckoutRoute: HospitalityHosp1CheckoutRoute,
+  HospitalityHosp2ScannerRoute: HospitalityHosp2ScannerRoute,
   HospitalitySecurityHospIdRoute: HospitalitySecurityHospIdRoute,
   HospitalityFinanceIndexRoute: HospitalityFinanceIndexRoute,
   HospitalityHosp1IndexRoute: HospitalityHosp1IndexRoute,

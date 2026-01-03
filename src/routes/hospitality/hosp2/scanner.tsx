@@ -8,36 +8,34 @@ import {
   CheckCircle2,
   XCircle,
   X,
-  LogOut,
-  LogIn,
+  Building,
+  DoorOpen,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StudentCard } from '@/components/hospitality/StudentCard'
 import { ConfirmationModal } from '@/components/hospitality/ConfirmationModal'
 import {
   useStudentRecord,
-  useDailyCheckInOut,
-  useFinalCheckOut,
+  useHostelCheckIn,
 } from '@/hooks/hospitality/useStudentMutation'
 import { isValidHospitalityID, type HospitalityID } from '@/types/hospitality'
 
-export const Route = createFileRoute('/hospitality/hosp1/checkout')({
-  component: Hosp1Checkout,
+export const Route = createFileRoute('/hospitality/hosp2/scanner')({
+  component: Hosp2Scanner,
 })
 
-function Hosp1Checkout() {
+function Hosp2Scanner() {
   const [scannedHospId, setScannedHospId] = useState<HospitalityID | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [scanResult, setScanResult] = useState<'success' | 'error' | null>(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
-  const [confirmAction, setConfirmAction] = useState<'daily_in' | 'daily_out' | 'final' | null>(null)
 
   const resultTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastScannedRef = useRef<string | null>(null)
+  const isShowingOverlayRef = useRef<boolean>(false)
 
   const { data: studentResponse, isLoading: isLoadingStudent } = useStudentRecord(scannedHospId || undefined)
-  const dailyCheckInOutMutation = useDailyCheckInOut()
-  const finalCheckOutMutation = useFinalCheckOut()
+  const hostelCheckInMutation = useHostelCheckIn()
 
   const student = studentResponse?.success ? studentResponse.data : null
 
@@ -45,16 +43,19 @@ function Hosp1Checkout() {
     if (navigator.vibrate) {
       navigator.vibrate(type === 'success' ? 200 : 500)
     }
+    isShowingOverlayRef.current = true
     setScanResult(type)
     if (resultTimeoutRef.current) clearTimeout(resultTimeoutRef.current)
     resultTimeoutRef.current = setTimeout(() => {
       setScanResult(null)
+      isShowingOverlayRef.current = false
     }, 2000)
   }, [])
 
   const handleScan = useCallback(
     (result: any) => {
       if (!result || isProcessing || scanResult) return
+      if (isShowingOverlayRef.current) return
 
       const rawText = result?.[0]?.rawValue
       if (!rawText) return
@@ -82,7 +83,7 @@ function Hosp1Checkout() {
 
       showResultFeedback('success')
 
-      // Delay transition to show green screen for 1.5 seconds
+      // Delay transition to show green screen
       setTimeout(() => {
         setScannedHospId(hospId)
         setIsProcessing(false)
@@ -95,53 +96,23 @@ function Hosp1Checkout() {
     console.error('Camera Error:', err)
   }
 
-  const handleConfirmAction = async () => {
-    if (!scannedHospId || !confirmAction) return
+  const handleConfirmCheckIn = async () => {
+    if (!scannedHospId) return
 
-    let success = false
-
-    if (confirmAction === 'final') {
-      const result = await finalCheckOutMutation.mutateAsync(scannedHospId)
-      success = result.success
-    } else {
-      const result = await dailyCheckInOutMutation.mutateAsync({
-        hospId: scannedHospId,
-        isCheckingOut: confirmAction === 'daily_out',
-      })
-      success = result.success
-    }
+    const result = await hostelCheckInMutation.mutateAsync(scannedHospId)
 
     setShowConfirmModal(false)
-    setConfirmAction(null)
 
-    if (success) {
+    if (result.success) {
       setScannedHospId(null)
     }
-  }
-
-  const openConfirmModal = (action: 'daily_in' | 'daily_out' | 'final') => {
-    setConfirmAction(action)
-    setShowConfirmModal(true)
   }
 
   const resetScanner = () => {
     setScannedHospId(null)
     lastScannedRef.current = null
+    isShowingOverlayRef.current = false
   }
-
-  // Get today's check-in status for daily students
-  const getTodayCheckInStatus = () => {
-    if (!student || student.accommodation_status !== 'NONE') return null
-
-    const today = new Date().toISOString().split('T')[0]
-    const todayRecord = student.daily_check_ins?.find((d) => d.date === today)
-
-    if (!todayRecord) return 'not_checked_in'
-    if (todayRecord.check_out_time) return 'checked_out'
-    return 'checked_in'
-  }
-
-  const todayStatus = getTodayCheckInStatus()
 
   const previewStyle: React.CSSProperties = {
     height: '100%',
@@ -151,14 +122,16 @@ function Hosp1Checkout() {
 
   // Show student details after scan
   if (scannedHospId && student) {
+    const canCheckIn = student.accommodation_status === 'PAID'
+
     return (
       <div className="min-h-[calc(100vh-80px)] p-4">
         <div className="max-w-md mx-auto space-y-6">
           {/* Header with X button on right */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold">Check-out</h1>
-              <p className="text-sm text-muted-foreground">Process check-out for student</p>
+              <h1 className="text-xl font-bold">HOSP 2</h1>
+              <p className="text-sm text-muted-foreground">Hostel Check-in</p>
             </div>
             <button
               onClick={resetScanner}
@@ -172,98 +145,41 @@ function Hosp1Checkout() {
 
           {/* Action buttons based on status */}
           <div className="space-y-3">
-            {student.accommodation_status === 'NONE' && (
-              <>
-                {todayStatus === 'not_checked_in' && (
-                  <Button
-                    className="w-full"
-                    size="lg"
-                    onClick={() => openConfirmModal('daily_in')}
-                  >
-                    <LogIn className="mr-2 h-5 w-5" />
-                    Daily Check-in
-                  </Button>
-                )}
-                {todayStatus === 'checked_in' && (
-                  <Button
-                    className="w-full"
-                    size="lg"
-                    variant="destructive"
-                    onClick={() => openConfirmModal('daily_out')}
-                  >
-                    <LogOut className="mr-2 h-5 w-5" />
-                    Daily Check-out
-                  </Button>
-                )}
-                {todayStatus === 'checked_out' && (
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <p className="text-sm text-muted-foreground">
-                      Already checked out for today
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
-
-            {student.accommodation_status === 'CHECKED_IN' && (
+            {canCheckIn ? (
               <Button
-                className="w-full"
+                className="w-full h-14 text-lg"
                 size="lg"
-                variant="destructive"
-                onClick={() => openConfirmModal('final')}
+                onClick={() => setShowConfirmModal(true)}
               >
-                <LogOut className="mr-2 h-5 w-5" />
-                Final Hostel Check-out
+                <DoorOpen className="mr-2 h-5 w-5" />
+                Complete Hostel Check-in
               </Button>
-            )}
-
-            {student.accommodation_status === 'CHECKED_OUT' && (
+            ) : (
               <div className="text-center p-4 bg-muted rounded-lg">
                 <p className="text-sm text-muted-foreground">
-                  Student has already checked out
-                </p>
-              </div>
-            )}
-
-            {(student.accommodation_status === 'REQUESTED' ||
-              student.accommodation_status === 'PAID') && (
-              <div className="text-center p-4 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  Cannot check out. Current status: {student.accommodation_status}
+                  {student.accommodation_status === 'REQUESTED'
+                    ? 'Payment not verified. Redirect to Finance first.'
+                    : student.accommodation_status === 'CHECKED_IN'
+                      ? 'Student already checked into hostel.'
+                      : student.accommodation_status === 'CHECKED_OUT'
+                        ? 'Student has already checked out.'
+                        : student.accommodation_status === 'NONE'
+                          ? 'No hostel accommodation (Day Scholar).'
+                          : `Cannot check in. Status: ${student.accommodation_status}`}
                 </p>
               </div>
             )}
           </div>
-
-          <Button variant="outline" className="w-full" onClick={resetScanner}>
-            Scan Another
-          </Button>
         </div>
 
         <ConfirmationModal
           isOpen={showConfirmModal}
-          onClose={() => {
-            setShowConfirmModal(false)
-            setConfirmAction(null)
-          }}
-          onConfirm={handleConfirmAction}
-          title={
-            confirmAction === 'final'
-              ? 'Final Check-out'
-              : confirmAction === 'daily_out'
-                ? 'Daily Check-out'
-                : 'Daily Check-in'
-          }
-          description={
-            confirmAction === 'final'
-              ? `Complete final hostel check-out for ${student.name}? This action cannot be undone.`
-              : confirmAction === 'daily_out'
-                ? `Process daily check-out for ${student.name}?`
-                : `Process daily check-in for ${student.name}?`
-          }
-          confirmText={confirmAction === 'final' ? 'Final Check-out' : 'Confirm'}
-          variant={confirmAction === 'final' ? 'destructive' : 'default'}
-          isLoading={dailyCheckInOutMutation.isPending || finalCheckOutMutation.isPending}
+          onClose={() => setShowConfirmModal(false)}
+          onConfirm={handleConfirmCheckIn}
+          title="Confirm Hostel Check-in"
+          description={`Complete hostel check-in for ${student.name} at ${student.hostel_name}?`}
+          confirmText="Complete Check-in"
+          isLoading={hostelCheckInMutation.isPending}
         />
       </div>
     )
@@ -288,7 +204,7 @@ function Hosp1Checkout() {
           {/* Header with X button on right */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold">Check-out</h1>
+              <h1 className="text-xl font-bold">HOSP 2</h1>
               <p className="text-sm text-muted-foreground">Student not found</p>
             </div>
             <button
@@ -304,10 +220,6 @@ function Hosp1Checkout() {
             <p className="font-medium text-destructive">Student Not Found</p>
             <p className="text-sm text-muted-foreground mt-2">{studentResponse.error}</p>
           </div>
-
-          <Button className="w-full" onClick={resetScanner}>
-            Scan Again
-          </Button>
         </div>
       </div>
     )
@@ -334,11 +246,11 @@ function Hosp1Checkout() {
         <div className="w-10" />
         <div className="bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
           <p className="text-xs text-white/70 font-medium uppercase tracking-widest text-center">
-            Scan to Check-out
+            Hostel Check-in
           </p>
         </div>
         <Link
-          to="/hospitality/hosp1"
+          to="/hospitality/hosp2"
           className="p-3 bg-black/40 backdrop-blur-md rounded-full text-white active:scale-95 transition-transform"
         >
           <X size={24} />
@@ -358,11 +270,11 @@ function Hosp1Checkout() {
       <div className="bg-background pb-8 pt-6 px-6 rounded-t-3xl -mt-6 relative z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-center gap-3">
-            <LogOut className="h-6 w-6 text-primary" />
-            <h2 className="text-xl font-bold">Check-out Scanner</h2>
+            <Building className="h-6 w-6 text-primary" />
+            <h2 className="text-xl font-bold">Hostel Check-in</h2>
           </div>
           <p className="text-center text-muted-foreground text-sm">
-            Scan the Hospitality ID to process check-out
+            Scan the Hospitality ID to complete hostel check-in
           </p>
         </div>
       </div>

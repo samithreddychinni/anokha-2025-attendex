@@ -11,6 +11,7 @@ import {
   Shield,
 } from 'lucide-react'
 import { isValidHospitalityID } from '@/types/hospitality'
+import { clearHospitalitySession } from '@/components/Login'
 
 export const Route = createFileRoute('/hospitality/security/')({
   component: SecurityScanner,
@@ -19,6 +20,10 @@ export const Route = createFileRoute('/hospitality/security/')({
 function SecurityScanner() {
   const navigate = useNavigate()
   const [isProcessing, setIsProcessing] = useState(false)
+
+  const handleLogout = () => {
+    clearHospitalitySession()
+  }
   const [scanResult, setScanResult] = useState<'success' | 'error' | null>(null)
 
   const resultTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -113,7 +118,8 @@ function SecurityScanner() {
           </p>
         </div>
         <Link
-          to="/hospitality"
+          to="/login"
+          onClick={handleLogout}
           className="p-3 bg-black/40 backdrop-blur-md rounded-full text-white active:scale-95 transition-transform"
         >
           <X size={24} />

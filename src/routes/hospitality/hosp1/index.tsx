@@ -2,15 +2,31 @@
 
 import { Link } from '@tanstack/react-router'
 import { createFileRoute } from '@tanstack/react-router'
-import { LogIn, LogOut } from 'lucide-react'
+import { LogIn, LogOut, X } from 'lucide-react'
+import { clearHospitalitySession } from '@/components/Login'
 
 export const Route = createFileRoute('/hospitality/hosp1/')({
   component: Hosp1Landing,
 })
 
 function Hosp1Landing() {
+  const handleLogout = () => {
+    clearHospitalitySession()
+  }
+
   return (
-    <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center p-6">
+    <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center p-6 relative">
+      {/* X button at top right - logout */}
+      <div className="absolute top-4 right-4">
+        <Link
+          to="/login"
+          onClick={handleLogout}
+          className="p-2 rounded-full hover:bg-muted transition-colors"
+        >
+          <X className="h-6 w-6" />
+        </Link>
+      </div>
+
       <div className="max-w-md w-full space-y-8 text-center">
         {/* Greeting */}
         <div className="space-y-3">
@@ -34,16 +50,6 @@ function Hosp1Landing() {
               <LogOut className="h-7 w-7" />
               Check-out
             </button>
-          </Link>
-        </div>
-
-        {/* Back link */}
-        <div className="pt-8">
-          <Link
-            to="/hospitality"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            ← Back to Role Selection
           </Link>
         </div>
       </div>
