@@ -117,7 +117,7 @@ const SEED_HOSTELS: Hostel[] = [
   },
   {
     id: 'H003',
-    name: 'Ganga',
+    name: 'Gangaaaaaaaaaaaaaa',
     sharing: 'Double Share',
     price: 1500,
     total_beds: 50,

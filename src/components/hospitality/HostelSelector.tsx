@@ -28,20 +28,20 @@ export function HostelSelector({
 }: HostelSelectorProps) {
   return (
     <div className="border rounded-xl overflow-hidden bg-background">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+      <div className="">
+        <table className="w-full text-xs sm:text-sm">
           <thead>
             <tr className="bg-muted/50 border-b">
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground w-[30%]">
-                Hostel Name
+              <th className="px-2 sm:px-4 py-3 text-left font-medium text-muted-foreground">
+                Hostel
               </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground w-[25%]">
-                Sharing
+              <th className="px-2 sm:px-4 py-3 text-left font-medium text-muted-foreground">
+                Type
               </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground w-[20%]">
+              <th className="px-2 sm:px-4 py-3 text-left font-medium text-muted-foreground">
                 Price
               </th>
-              <th className="px-4 py-3 text-right font-medium text-muted-foreground w-[25%]">
+              <th className="px-2 sm:px-4 py-3 text-right font-medium text-muted-foreground whitespace-nowrap">
                 Beds Left
               </th>
             </tr>
@@ -56,41 +56,31 @@ export function HostelSelector({
                   key={hostel.id}
                   onClick={() => !isDisabled && !isLoading && onSelect(hostel)}
                   className={cn(
-                    'group transition-colors border-b last:border-0',
-                    isDisabled ? 'opacity-50 cursor-not-allowed bg-muted/30' : 'cursor-pointer hover:bg-muted/30',
-                    isSelected && 'bg-primary/5 hover:bg-primary/10'
+                    'group transition-all duration-200 border-b last:border-0 relative',
+                    isDisabled ? 'opacity-50 cursor-not-allowed bg-muted/30' : 'cursor-pointer hover:bg-muted/50',
+                    isSelected && 'bg-primary/20 ring-2 ring-inset ring-primary z-10'
                   )}
                 >
-                  <td className="px-4 py-3 font-medium">
-                    <div className="flex items-center gap-2">
-                      {/* Optional: Add radio/checkbox indicator for clarity */}
-                      <div className={cn(
-                        "w-4 h-4 rounded-full border flex items-center justify-center transition-colors",
-                        isSelected ? "border-primary bg-primary" : "border-muted-foreground/30",
-                        isDisabled && "opacity-0"
-                      )}>
-                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-background" />}
-                      </div>
-                      {hostel.name}
-                    </div>
+                  <td className="px-2 sm:px-4 py-3 font-medium">
+                    {hostel.name}
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">
+                  <td className="px-2 sm:px-4 py-3 text-muted-foreground">
                     {hostel.sharing}
                   </td>
-                  <td className="px-4 py-3 font-medium">
+                  <td className="px-2 sm:px-4 py-3 font-medium">
                     ₹{hostel.price}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-2 sm:px-4 py-3 text-right">
                     <span
                       className={cn(
-                        'inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border',
+                        'inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-md text-[10px] sm:text-xs font-medium border whitespace-nowrap',
                         getAvailabilityColor(hostel.available_beds)
                       )}
                     >
                       {hostel.available_beds > 0 ? (
                         <>
                           <div className={cn(
-                            "w-1.5 h-1.5 rounded-full mr-1.5",
+                            "w-1.5 h-1.5 rounded-full mr-1",
                             hostel.available_beds > 40 ? "bg-green-500" :
                               hostel.available_beds > 20 ? "bg-yellow-500" : "bg-red-500"
                           )} />
