@@ -129,6 +129,8 @@ const SEED_HOSTELS: Hostel[] = [
 
 // ============ Mock Database Class ============
 
+const STORAGE_KEY = 'hospitality_mock_db_v1';
+
 class MockDatabase {
   private studentProfiles: Map<string, StudentProfile> = new Map()
   private studentRecords: Map<HospitalityID, StudentRecord> = new Map()
@@ -141,13 +143,50 @@ class MockDatabase {
   }
 
   private initialize() {
-    // Initialize student profiles
+    // Initialize student profiles (always static)
     for (const profile of SEED_STUDENT_PROFILES) {
       this.studentProfiles.set(profile.student_id, profile)
     }
 
-    // Initialize hostels
+    // Try detecting existing data from localStorage
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved)
+
+          // Rehydrate records
+          this.studentRecords = new Map(parsed.studentRecords)
+          this.studentIdToHospId = new Map(parsed.studentIdToHospId)
+          this.usedHospitalityIDs = new Set(parsed.usedHospitalityIDs)
+          this.hostels = parsed.hostels || [...SEED_HOSTELS]
+
+          console.log('[MockDB] Loaded data from localStorage:', {
+            records: this.studentRecords.size,
+            hostels: this.hostels.length
+          })
+          return
+        } catch (e) {
+          console.error('[MockDB] Failed to load data:', e)
+        }
+      }
+    }
+
+    // Default initialization if no saved data
     this.hostels = [...SEED_HOSTELS]
+  }
+
+  private saveToStorage() {
+    if (typeof window === 'undefined') return
+
+    const data = {
+      studentRecords: Array.from(this.studentRecords.entries()),
+      studentIdToHospId: Array.from(this.studentIdToHospId.entries()),
+      usedHospitalityIDs: Array.from(this.usedHospitalityIDs),
+      hostels: this.hostels,
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
   }
 
   // ============ Student Profile Methods ============
@@ -166,6 +205,7 @@ class MockDatabase {
     this.studentRecords.set(record.hospitality_id, record)
     this.studentIdToHospId.set(record.student_id, record.hospitality_id)
     this.usedHospitalityIDs.add(record.hospitality_id)
+    this.saveToStorage()
   }
 
   getStudentRecord(hospId: HospitalityID): StudentRecord | undefined {
@@ -186,6 +226,7 @@ class MockDatabase {
         ...updates,
         updated_at: new Date().toISOString(),
       })
+      this.saveToStorage()
     }
   }
 
@@ -226,6 +267,7 @@ class MockDatabase {
     if (hostel) {
       hostel.occupied_beds += delta
       hostel.available_beds = hostel.total_beds - hostel.occupied_beds
+      this.saveToStorage()
     }
   }
 
@@ -250,6 +292,16 @@ class MockDatabase {
     this.studentIdToHospId.clear()
     this.usedHospitalityIDs.clear()
     this.initialize()
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEY)
+    }
+    // Re-save the clean state (just seed data)
+    this.saveToStorage() // Actually initialize() loads static data, but we might want to clear specific persistent parts. 
+    // initialize() reloads SEED_HOSTELS. 
+    // better to explicitly clear localStorage and let initialize handle static.
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEY)
+    }
   }
 }
 

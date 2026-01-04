@@ -61,13 +61,17 @@ export const hospitalityMockAPI = {
    * Used by all roles to fetch student details after scanning HospitalityQR
    */
   async getStudentByHospId(hospId: HospitalityID): Promise<ApiResponse<StudentRecord>> {
+    console.log('[API] getStudentByHospId request:', hospId)
     await randomDelay()
 
     if (!/^[A-Z][0-9]{3}$/.test(hospId)) {
+      console.log('[API] Invalid Hosp ID format:', hospId)
       return { success: false, error: 'Invalid Hospitality ID format (expected: A123)' }
     }
 
     const record = mockDB.getStudentRecord(hospId)
+    console.log('[API] getStudentByHospId result:', record ? 'Found' : 'Not Found', record)
+
     if (!record) {
       return { success: false, error: 'No student mapped to this Hospitality ID' }
     }
@@ -82,6 +86,7 @@ export const hospitalityMockAPI = {
    * Maps a student_id to a HospitalityID with accommodation details
    */
   async createStudentMapping(req: CreateStudentMappingRequest): Promise<ApiResponse<StudentRecord>> {
+    console.log('[API] createStudentMapping request:', req)
     await randomDelay(500, 800)
 
     // Validate Hospitality ID format
