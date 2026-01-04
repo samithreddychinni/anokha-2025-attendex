@@ -100,11 +100,11 @@ function Hosp1Checkin() {
       if (!rawText) return
 
       if (state.step === 'PROFILE_QR') {
-        const success = await handleProfileQRScan(rawText)
-        // Only show toast on actual failure (false), not when blocked (null)
-        if (success === false) {
-          toast.error('Invalid QR', {
-            description: 'Please scan a valid Profile QR code',
+        const result = await handleProfileQRScan(rawText)
+        // Only show toast on actual failure (success: false), not when blocked (null)
+        if (result && !result.success) {
+          toast.error('Scan Failed', {
+            description: result.error || 'Please scan a valid Profile QR code',
             position: 'bottom-center',
           })
         }

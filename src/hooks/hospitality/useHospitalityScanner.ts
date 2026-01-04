@@ -40,21 +40,33 @@ export function useHospitalityScanner() {
 
   // Parse ProfileQR JSON and extract student_id
   const parseProfileQR = useCallback((rawText: string): ProfileQRData | null => {
+    console.log('[Scanner] Raw Profile Scan:', rawText)
+
+    // Try parsing as JSON first
     try {
       const parsed = JSON.parse(rawText)
-      if (!parsed.student_id) {
-        return null
+      if (parsed.student_id) {
+        return { student_id: parsed.student_id }
       }
-      return { student_id: parsed.student_id }
-    } catch {
-      return null
+    } catch (e) {
+      // Ignore JSON parse error
     }
+
+    // Fallback: Assume the raw text is the Student ID itself if it looks reasonable
+    // (You might want to add regex validation here if Student IDs have a strict format)
+    if (rawText && typeof rawText === 'string' && rawText.length > 0) {
+      return { student_id: rawText.trim() }
+    }
+
+    return null
   }, [])
 
   // Handle ProfileQR scan - fetch student profile
   // Returns: true = success, false = error (show toast), null = blocked (no toast)
+  // Handle ProfileQR scan - fetch student profile
+  // Returns: { success: true } or { success: false, error: '...' } or null (blocked)
   const handleProfileQRScan = useCallback(
-    async (rawText: string): Promise<boolean | null> => {
+    async (rawText: string): Promise<{ success: boolean; error?: string } | null> => {
       // Prevent duplicate scans and block during overlay - return null to skip toast
       if (rawText === lastScannedRef.current) return null
       if (state.isProcessing) return null
@@ -73,7 +85,7 @@ export function useHospitalityScanner() {
       if (!profileQR) {
         showResultFeedback('error')
         setState((prev) => ({ ...prev, isProcessing: false }))
-        return false
+        return { success: false, error: `Invalid QR format: ${rawText}` }
       }
 
       // Fetch student profile from mock API
@@ -82,7 +94,7 @@ export function useHospitalityScanner() {
       if (!response.success || !response.data) {
         showResultFeedback('error')
         setState((prev) => ({ ...prev, isProcessing: false }))
-        return false
+        return { success: false, error: response.error || `Student not found: ${profileQR.student_id}` }
       }
 
       showResultFeedback('success')
@@ -98,7 +110,7 @@ export function useHospitalityScanner() {
         }))
       }, 1500)
 
-      return true
+      return { success: true }
     },
     [state.isProcessing, parseProfileQR, showResultFeedback]
   )

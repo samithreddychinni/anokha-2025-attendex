@@ -227,17 +227,15 @@ function Hosp1Checkout() {
 
             {(student.accommodation_status === 'REQUESTED' ||
               student.accommodation_status === 'PAID') && (
-              <div className="text-center p-4 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  Cannot check out. Current status: {student.accommodation_status}
-                </p>
-              </div>
-            )}
+                <div className="text-center p-4 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    Cannot check out. Current status: {student.accommodation_status}
+                  </p>
+                </div>
+              )}
           </div>
 
-          <Button variant="outline" className="w-full" onClick={resetScanner}>
-            Scan Another
-          </Button>
+
         </div>
 
         <ConfirmationModal
@@ -318,9 +316,8 @@ function Hosp1Checkout() {
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
       {scanResult && (
         <div
-          className={`absolute inset-0 z-[60] flex items-center justify-center transition-opacity duration-300 ${
-            scanResult === 'success' ? 'bg-green-500/80' : 'bg-red-500/80'
-          }`}
+          className={`absolute inset-0 z-[60] flex items-center justify-center transition-opacity duration-300 ${scanResult === 'success' ? 'bg-green-500/80' : 'bg-red-500/80'
+            }`}
         >
           {scanResult === 'success' ? (
             <CheckCircle2 className="w-32 h-32 text-white animate-pulse" strokeWidth={2} />

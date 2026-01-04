@@ -148,9 +148,9 @@ class MockDatabase {
       this.studentProfiles.set(profile.student_id, profile)
     }
 
-    // Try detecting existing data from localStorage
+    // Try detecting existing data from sessionStorage
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(STORAGE_KEY)
+      const saved = sessionStorage.getItem(STORAGE_KEY)
       if (saved) {
         try {
           const parsed = JSON.parse(saved)
@@ -161,7 +161,7 @@ class MockDatabase {
           this.usedHospitalityIDs = new Set(parsed.usedHospitalityIDs)
           this.hostels = parsed.hostels || [...SEED_HOSTELS]
 
-          console.log('[MockDB] Loaded data from localStorage:', {
+          console.log('[MockDB] Loaded data from sessionStorage:', {
             records: this.studentRecords.size,
             hostels: this.hostels.length
           })
@@ -186,7 +186,7 @@ class MockDatabase {
       hostels: this.hostels,
     }
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data))
   }
 
   // ============ Student Profile Methods ============
@@ -287,21 +287,22 @@ class MockDatabase {
 
   // ============ Reset (for testing) ============
 
+  // ============ Reset (for testing) ============
+
   reset(): void {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem(STORAGE_KEY)
+    }
+
     this.studentRecords.clear()
     this.studentIdToHospId.clear()
     this.usedHospitalityIDs.clear()
+
+    // Initialize will now use default seed data since storage is empty
     this.initialize()
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(STORAGE_KEY)
-    }
-    // Re-save the clean state (just seed data)
-    this.saveToStorage() // Actually initialize() loads static data, but we might want to clear specific persistent parts. 
-    // initialize() reloads SEED_HOSTELS. 
-    // better to explicitly clear localStorage and let initialize handle static.
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(STORAGE_KEY)
-    }
+
+    // Save the clean state
+    this.saveToStorage()
   }
 }
 

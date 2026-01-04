@@ -82,6 +82,8 @@ export interface DailyCheckIn {
 export interface Hostel {
   id: string
   name: string
+  sharing: string
+  price: number
   total_beds: number
   occupied_beds: number
   available_beds: number
