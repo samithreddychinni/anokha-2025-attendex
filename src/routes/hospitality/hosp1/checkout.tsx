@@ -12,6 +12,7 @@ import {
   LogIn,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { StudentCard } from '@/components/hospitality/StudentCard'
 import { ConfirmationModal } from '@/components/hospitality/ConfirmationModal'
 import {
@@ -31,6 +32,10 @@ function Hosp1Checkout() {
   const [scanResult, setScanResult] = useState<'success' | 'error' | null>(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'daily_in' | 'daily_out' | 'final' | null>(null)
+
+  // Manual Entry State
+  const [manualId, setManualId] = useState('')
+  const [isManualEntryOpen, setIsManualEntryOpen] = useState(false)
 
   const resultTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastScannedRef = useRef<string | null>(null)
@@ -95,6 +100,26 @@ function Hosp1Checkout() {
     console.error('Camera Error:', err)
   }
 
+  const handleManualSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault()
+
+    const hospId = manualId.trim().toUpperCase()
+    if (!isValidHospitalityID(hospId)) {
+      toast.error('Invalid ID', {
+        description: 'Please enter a valid Hospitality ID (e.g., A123)',
+        position: 'bottom-center',
+      })
+      return
+    }
+
+    // Simulate scan success
+    showResultFeedback('success')
+    setTimeout(() => {
+      setScannedHospId(hospId)
+      setIsManualEntryOpen(false)
+    }, 500)
+  }
+
   const handleConfirmAction = async () => {
     if (!scannedHospId || !confirmAction) return
 
@@ -116,6 +141,7 @@ function Hosp1Checkout() {
 
     if (success) {
       setScannedHospId(null)
+      setManualId('') // Clear input on success
     }
   }
 
@@ -127,6 +153,8 @@ function Hosp1Checkout() {
   const resetScanner = () => {
     setScannedHospId(null)
     lastScannedRef.current = null
+    setManualId('')
+    setIsManualEntryOpen(false)
   }
 
   // Get today's check-in status for daily students
@@ -354,13 +382,48 @@ function Hosp1Checkout() {
 
       <div className="bg-background pb-8 pt-6 px-6 rounded-t-3xl -mt-6 relative z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
         <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-center gap-3">
-            <LogOut className="h-6 w-6 text-primary" />
-            <h2 className="text-xl font-bold">Check-out Scanner</h2>
-          </div>
-          <p className="text-center text-muted-foreground text-sm">
-            Scan the Hospitality ID to process check-out
-          </p>
+          {!isManualEntryOpen ? (
+            <>
+              <div className="flex items-center justify-center gap-3">
+                <LogOut className="h-6 w-6 text-primary" />
+                <h2 className="text-xl font-bold">Check-out Scanner</h2>
+              </div>
+              <p className="text-center text-muted-foreground text-sm">
+                Scan the Hospitality ID to process check-out
+              </p>
+              <Button
+                variant="outline"
+                className="w-full mt-2"
+                onClick={() => setIsManualEntryOpen(true)}
+              >
+                Enter ID Manually
+              </Button>
+            </>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold">Enter Hospitality ID</h2>
+                <button
+                  onClick={() => setIsManualEntryOpen(false)}
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Cancel
+                </button>
+              </div>
+              <form onSubmit={handleManualSubmit} className="flex gap-2">
+                <Input
+                  placeholder="e.g. A123"
+                  value={manualId}
+                  onChange={(e) => setManualId(e.target.value)}
+                  className="flex-1"
+                  autoFocus
+                />
+                <Button type="submit">
+                  Search
+                </Button>
+              </form>
+            </div>
+          )}
         </div>
       </div>
     </div>
